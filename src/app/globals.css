@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  /* Primary surfaces */
+  --color-ivory: #fbf8f3;
+  --color-cream: #f4eee3;
+  --color-beige: #e9dcc6;
+
+  /* Supporting warm neutrals */
+  --color-champagne: #d9bf95;
+  --color-taupe: #9c8871;
+
+  /* Typography */
+  --color-charcoal: #2a231d;
+  --color-charcoal-soft: #4a3f35;
+
+  /* Sparingly-used accent */
+  --color-gold: #ad8748;
+
+  --color-line: #e3d8c5;
+  --color-background: var(--color-ivory);
+  --color-foreground: var(--color-charcoal);
+}
+
+@theme inline {
+  --color-ivory: var(--color-ivory);
+  --color-cream: var(--color-cream);
+  --color-beige: var(--color-beige);
+  --color-champagne: var(--color-champagne);
+  --color-taupe: var(--color-taupe);
+  --color-charcoal: var(--color-charcoal);
+  --color-charcoal-soft: var(--color-charcoal-soft);
+  --color-gold: var(--color-gold);
+  --color-line: var(--color-line);
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Thin, wide letter-spacing used on small labels/eyebrows throughout the site */
+.tracking-label {
+  letter-spacing: 0.14em;
+}
