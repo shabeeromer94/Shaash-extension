@@ -9,29 +9,35 @@ import { cn } from "@/lib/utils/cn";
 import type { ProductImage } from "@/lib/types";
 
 const ZOOM_SCALE = 2.2;
-
-/**
- * The catalog's "main view" photo (always named img-1) is a fixed studio
- * template: a front pose on the left, a ruler chart + length badge in the
- * middle, and a back pose on the right, all baked into one file. We only want
- * to lead with the front — the narrow aspect ratio below, combined with
- * object-position "left", crops object-fit:cover to roughly that left third
- * for every product without touching the source images.
- */
-function isFrontBackComposite(image: ProductImage) {
-  return image.image_url.includes("img-1");
-}
+// Fallback while the active image's real dimensions are still loading.
+const DEFAULT_RATIO = 4 / 5;
 
 /**
  * Main image + thumbnail rail + lightbox. Deliberately makes no assumption
  * about how many images exist — works with zero (placeholder), one, or many.
+ *
+ * The main frame's aspect ratio is set to each image's own natural
+ * dimensions (measured on load) and paired with object-contain, so the
+ * whole photo always shows at full size — never cropped, regardless of
+ * whether it's a landscape "front/back" composite or a portrait detail shot.
  */
 export function ProductGallery({ images, productName }: { images: ProductImage[]; productName: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [zoomed, setZoomed] = useState(false);
   const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const [naturalRatio, setNaturalRatio] = useState<number | null>(null);
   const frameRef = useRef<HTMLDivElement>(null);
+
+  // A newly-selected image has a different natural ratio — reset during
+  // render (React's recommended pattern for "adjusting state on prop
+  // change") rather than in an effect, so we never paint the previous
+  // image's box size for the new one.
+  const [lastIndex, setLastIndex] = useState(activeIndex);
+  if (activeIndex !== lastIndex) {
+    setLastIndex(activeIndex);
+    setNaturalRatio(null);
+  }
 
   if (images.length === 0) {
     return (
@@ -42,12 +48,9 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
   }
 
   const active = images[activeIndex];
-  const isComposite = isFrontBackComposite(active);
   const goTo = (delta: number) =>
     setActiveIndex((current) => (current + delta + images.length) % images.length);
 
-  // Zooming just scales the already-cropped content around the cursor — since
-  // object-position already excludes the ruler/back, panning can never reveal it.
   function handleMouseMove(event: MouseEvent<HTMLDivElement>) {
     const rect = frameRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -62,10 +65,8 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
       <Dialog.Root open={lightboxOpen} onOpenChange={setLightboxOpen}>
         <div
           ref={frameRef}
-          className={cn(
-            "relative overflow-hidden rounded-2xl bg-beige/40",
-            isComposite ? "aspect-[11/24]" : "aspect-square sm:aspect-[4/5]"
-          )}
+          className="relative w-full overflow-hidden rounded-2xl bg-beige/40"
+          style={{ aspectRatio: naturalRatio ?? DEFAULT_RATIO }}
           onMouseEnter={() => setZoomed(true)}
           onMouseLeave={() => setZoomed(false)}
           onMouseMove={handleMouseMove}
@@ -76,11 +77,16 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
             fill
             priority
             sizes="(min-width: 1024px) 40vw, 100vw"
-            className={cn("object-cover transition-transform duration-300 ease-out", zoomed && "cursor-zoom-in")}
+            className={cn("object-contain transition-transform duration-300 ease-out", zoomed && "cursor-zoom-in")}
             style={{
-              objectPosition: isComposite ? "left center" : "center",
               transform: zoomed ? `scale(${ZOOM_SCALE})` : "scale(1)",
               transformOrigin: `${origin.x}% ${origin.y}%`,
+            }}
+            onLoad={(event) => {
+              const img = event.currentTarget;
+              if (img.naturalWidth && img.naturalHeight) {
+                setNaturalRatio(img.naturalWidth / img.naturalHeight);
+              }
             }}
           />
           {!zoomed && (

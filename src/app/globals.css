@@ -1,23 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  /* Primary surfaces */
-  --color-ivory: #fbf8f3;
-  --color-cream: #f4eee3;
-  --color-beige: #e9dcc6;
+  /* Black-and-white theme — every component below references these same
+     semantic names (text-charcoal, bg-cream, text-gold, etc.), so retuning
+     the palette here is a full site re-theme with no component changes. */
 
-  /* Supporting warm neutrals */
-  --color-champagne: #d9bf95;
-  --color-taupe: #9c8871;
+  /* Primary surfaces */
+  --color-ivory: #ffffff;
+  --color-cream: #fafafa;
+  --color-beige: #eeeeee;
+
+  /* Supporting neutrals */
+  --color-champagne: #e5e5e5;
+  --color-taupe: #737373;
 
   /* Typography */
-  --color-charcoal: #2a231d;
-  --color-charcoal-soft: #4a3f35;
+  --color-charcoal: #111111;
+  --color-charcoal-soft: #404040;
 
-  /* Sparingly-used accent */
-  --color-gold: #ad8748;
+  /* Sparingly-used accent — was amber gold, now pure black for a true
+     monochrome look (still reads as "accent" purely through its usage
+     context: eyebrows, badges, active states). */
+  --color-gold: #000000;
 
-  --color-line: #e3d8c5;
+  --color-line: #e5e5e5;
   --color-background: var(--color-ivory);
   --color-foreground: var(--color-charcoal);
 }

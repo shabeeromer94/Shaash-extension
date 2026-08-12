@@ -23,9 +23,10 @@ export function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-charcoal-soft transition-colors hover:text-charcoal"
+              className="group relative py-1 text-xs font-medium uppercase tracking-label text-charcoal-soft transition-colors hover:text-charcoal"
             >
               {link.label}
+              <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-charcoal transition-transform duration-300 ease-out group-hover:scale-x-100" />
             </Link>
           ))}
         </nav>
