@@ -33,20 +33,22 @@ export function Hero({ image }: { image?: HeroImage }) {
           </div>
         </div>
 
-        <div className="relative mx-auto w-full max-w-md">
+        <div className="relative mx-auto w-full max-w-xl">
           {image ? (
-            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-beige/40">
+            // aspect-[1070/864] matches product 204's img-1 at its own native proportions —
+            // object-contain then shows the whole photo at full size, never cropped or letterboxed.
+            <div className="relative aspect-[1070/864] overflow-hidden rounded-3xl bg-beige/40">
               <Image
                 src={image.src}
                 alt={image.alt}
                 fill
-                sizes="(min-width: 640px) 40vw, 80vw"
-                className="object-cover"
+                sizes="(min-width: 640px) 50vw, 90vw"
+                className="object-contain"
                 priority
               />
             </div>
           ) : (
-            <div className="aspect-[4/5] rounded-3xl bg-beige/40" />
+            <div className="aspect-[1070/864] rounded-3xl bg-beige/40" />
           )}
         </div>
       </Container>
