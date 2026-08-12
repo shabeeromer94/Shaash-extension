@@ -6,7 +6,7 @@ const FOOTER_LINKS = [
     title: "Shop",
     links: [
       { href: "/shop", label: "All Products" },
-      { href: "/hairstyles", label: "Hairstyle Finder" },
+      { href: "/hairstyles", label: "Extension Finder" },
       { href: "/inspiration", label: "Hairstyle Inspiration" },
     ],
   },
@@ -50,9 +50,13 @@ export function Footer() {
         <div>
           <p className="text-sm font-semibold text-charcoal">Contact</p>
           <ul className="mt-4 flex flex-col gap-3 text-sm text-charcoal-soft">
-            {/* PLACEHOLDER: replace with real support email/phone/social links. */}
+            {/* PLACEHOLDER: replace hello@shaashbeauty.com with a real support email once you have one. */}
             <li>hello@shaashbeauty.com</li>
-            <li>+91 00000 00000</li>
+            <li>
+              <a href="https://wa.me/917200001934" target="_blank" rel="noopener noreferrer" className="hover:text-charcoal">
+                +91 72000 01934 (WhatsApp)
+              </a>
+            </li>
           </ul>
         </div>
       </Container>

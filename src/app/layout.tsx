@@ -4,6 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { FloatingContactLinks } from "@/components/layout/FloatingContactLinks";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />
+          <FloatingContactLinks />
         </CartProvider>
       </body>
     </html>
