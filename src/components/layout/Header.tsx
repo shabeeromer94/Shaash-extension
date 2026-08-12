@@ -5,7 +5,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 
 const NAV_LINKS = [
   { href: "/shop", label: "Shop" },
-  { href: "/hairstyles", label: "Hairstyle Finder" },
+  { href: "/hairstyles", label: "Extension Finder" },
   { href: "/inspiration", label: "Inspiration" },
   { href: "/about", label: "About" },
 ];

@@ -23,27 +23,31 @@ export function HairstylePicker({
             key={style.id}
             href={`/hairstyles?style=${style.slug}#results`}
             className={cn(
-              "group relative flex aspect-square flex-col items-center justify-center overflow-hidden rounded-2xl border-2 p-4 text-center transition-colors",
-              active ? "border-charcoal bg-champagne/30" : "border-transparent bg-beige/40 hover:border-taupe/60"
+              "group flex flex-col overflow-hidden rounded-2xl border-2 bg-beige/40 transition-colors",
+              active ? "border-charcoal" : "border-transparent hover:border-taupe/60"
             )}
           >
-            {style.image_url && (
-              <Image
-                src={style.image_url}
-                alt={style.name}
-                fill
-                sizes="(min-width: 1024px) 20vw, 40vw"
-                className="object-cover opacity-90"
-              />
-            )}
-            <span
+            {/* aspect-[3/5] is close to these reference photos' own portrait proportions —
+                object-contain shows the whole photo uncropped instead of cutting off hair/jewellery detail. */}
+            <div className="relative aspect-[3/5] w-full">
+              {style.image_url && (
+                <Image
+                  src={style.image_url}
+                  alt={style.name}
+                  fill
+                  sizes="(min-width: 1024px) 20vw, 40vw"
+                  className="object-contain transition-transform duration-500 group-hover:scale-105"
+                />
+              )}
+            </div>
+            <p
               className={cn(
-                "relative z-10 font-display text-base text-charcoal",
-                style.image_url && "rounded-full bg-ivory/85 px-3 py-1"
+                "px-3 py-2 text-center font-display text-sm sm:text-base",
+                active ? "bg-champagne/30 text-charcoal" : "bg-ivory/85 text-charcoal"
               )}
             >
               {style.name}
-            </span>
+            </p>
           </Link>
         );
       })}

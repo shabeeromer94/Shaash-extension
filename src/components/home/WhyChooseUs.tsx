@@ -22,7 +22,7 @@ const REASONS = [
   {
     icon: HeartHandshake,
     title: "Here to Help You Choose",
-    description: "Not sure what suits you? Our Hairstyle Finder points you to the right match.",
+    description: "Not sure what suits you? Our Extension Finder points you to the right match.",
   },
 ];
 

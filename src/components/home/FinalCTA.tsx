@@ -12,7 +12,7 @@ export function FinalCTA() {
           Find Your Perfect Hair Extension Today
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-ivory/80">
-          Browse the full collection or let our Hairstyle Finder point you to the right match in
+          Browse the full collection or let our Extension Finder point you to the right match in
           seconds.
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

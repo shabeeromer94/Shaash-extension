@@ -167,7 +167,7 @@ export async function getRelatedProducts(product: Product, limit = 4): Promise<P
   }
 }
 
-/** Products tagged with a given hairstyle slug — powers the Hairstyle Finder results. */
+/** Products tagged with a given hairstyle slug — powers the Extension Finder results. */
 export async function getProductsByHairstyleSlug(slug: string): Promise<Product[]> {
   const products = await getAllProducts();
   return products.filter((p) => p.hairstyles?.some((h) => h.slug === slug));

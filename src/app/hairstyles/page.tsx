@@ -9,7 +9,7 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Hairstyle Finder",
+  title: "Extension Finder",
   description:
     "Not sure which hair extension suits your look? Pick your hairstyle goal and we'll match you to the right products.",
 };
@@ -30,8 +30,8 @@ export default async function HairstyleFinderPage({
     <div className="py-12 sm:py-16">
       <Container>
         <SectionHeading
-          eyebrow="Hairstyle Finder"
-          title="Find Your Perfect Hair Extension"
+          eyebrow="Extension Finder"
+          title="with Hairstyles"
           description="Pick the hairstyle you're going for and we'll show you extensions that suit it."
         />
         <div className="mt-12">

@@ -17,18 +17,26 @@ insert into categories (slug, name, description, sort_order) values
 on conflict (slug) do nothing;
 
 -- ---------------------------------------------------------------------
--- hairstyles (Hairstyle Finder taxonomy)
+-- hairstyles (Extension Finder taxonomy)
+-- Upserts on slug (so re-running this updates name/description/sort_order/
+-- image on an already-seeded database, not just skips), then removes any
+-- category not in this list — the taxonomy below is the full, current set.
 -- ---------------------------------------------------------------------
-insert into hairstyles (slug, name, description, sort_order) values
-  ('soft-curls', 'Soft Curls', 'Loose, romantic curls for an easy, everyday look.', 0),
-  ('voluminous-curls', 'Voluminous Curls', 'Big, bouncy curls that add serious volume.', 1),
-  ('half-up-half-down', 'Half-Up Half-Down', 'A classic style that mixes length with face-framing volume.', 2),
-  ('ponytail', 'Ponytail', 'Instant length and thickness for a high or low ponytail.', 3),
-  ('braided', 'Braided Style', 'Extra length and body for braids and plaits.', 4),
-  ('waterfall-braid', 'Waterfall Braid', 'Cascading texture that works beautifully in a waterfall braid.', 5),
-  ('bridal', 'Bridal Hairstyle', 'Full, elegant volume for wedding and special-occasion looks.', 6),
-  ('long-flowing-curls', 'Long Flowing Curls', 'Dramatic length with soft, flowing curl definition.', 7)
-on conflict (slug) do nothing;
+insert into hairstyles (slug, name, description, sort_order, image_url) values
+  ('soft-curls', 'Soft Curls', 'Loose, romantic curls for an easy, everyday look.', 0, '/images/hairstyles/soft-curls.jpg'),
+  ('braided', 'Braids', 'Extra length and body for clean, classic braids.', 1, '/images/hairstyles/braids.jpg'),
+  ('half-up-half-down', 'Half-Up Half-Down', 'A classic style that mixes length with face-framing volume.', 2, '/images/hairstyles/half-up-half-down.jpg'),
+  ('heart-braids', 'Heart Braids', 'A braid styled into a romantic heart shape — a favourite for engagements and pre-wedding shoots.', 3, '/images/hairstyles/heart-braids.jpg'),
+  ('voluminous-curls', 'Voluminous Curls', 'Big, bouncy curls that add serious volume.', 4, '/images/hairstyles/voluminous-curls.jpg'),
+  ('messy-braids', 'Messy Braids', 'A relaxed, textured braid with pulled-apart strands for effortless volume.', 5, '/images/hairstyles/messy-braids.jpg')
+on conflict (slug) do update set
+  name = excluded.name,
+  description = excluded.description,
+  sort_order = excluded.sort_order,
+  image_url = excluded.image_url;
+
+delete from hairstyles
+where slug not in ('soft-curls', 'braided', 'half-up-half-down', 'heart-braids', 'voluminous-curls', 'messy-braids');
 
 -- ---------------------------------------------------------------------
 -- products (your 8 current items)
@@ -134,19 +142,22 @@ where not exists (
 
 -- ---------------------------------------------------------------------
 -- product_hairstyles — which hairstyles each product suits.
--- This is what the Hairstyle Finder matches against.
+-- This is what the Extension Finder matches against. Cleared and
+-- reinserted in full each run (rather than on-conflict-skip) since the
+-- mapping below is a complete redefinition, not an incremental addition —
+-- re-running this always converges to exactly this set.
 -- ---------------------------------------------------------------------
+delete from product_hairstyles;
+
 insert into product_hairstyles (product_id, hairstyle_id)
 select p.id, h.id
 from (values
-  ('201', 'soft-curls'), ('201', 'half-up-half-down'), ('201', 'long-flowing-curls'),
-  ('202', 'soft-curls'), ('202', 'ponytail'), ('202', 'half-up-half-down'),
-  ('203', 'soft-curls'), ('203', 'ponytail'),
-  ('204', 'soft-curls'), ('204', 'half-up-half-down'),
-  ('205', 'voluminous-curls'), ('205', 'bridal'), ('205', 'long-flowing-curls'),
-  ('206', 'voluminous-curls'), ('206', 'braided'), ('206', 'bridal'),
-  ('209', 'voluminous-curls'), ('209', 'waterfall-braid'),
-  ('210', 'voluminous-curls'), ('210', 'ponytail'), ('210', 'braided')
+  ('204', 'soft-curls'), ('202', 'soft-curls'), ('203', 'soft-curls'), ('201', 'soft-curls'),
+  ('206', 'braided'), ('205', 'braided'),
+  ('210', 'half-up-half-down'), ('209', 'half-up-half-down'),
+  ('210', 'heart-braids'), ('204', 'heart-braids'), ('209', 'heart-braids'), ('203', 'heart-braids'),
+  ('210', 'voluminous-curls'), ('209', 'voluminous-curls'),
+  ('206', 'messy-braids'), ('205', 'messy-braids')
 ) as v(code, style_slug)
 join products p on p.code = v.code
 join hairstyles h on h.slug = v.style_slug
