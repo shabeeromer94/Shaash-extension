@@ -3,8 +3,15 @@
 import Image from "next/image";
 import { useCart } from "@/lib/cart-context";
 import { formatINR } from "@/lib/utils/format";
+import type { DeliveryMethod } from "@/lib/utils/shipping";
 
-export function OrderSummary() {
+export function OrderSummary({
+  deliveryMethod = "courier",
+  shippingFee = 0,
+}: {
+  deliveryMethod?: DeliveryMethod;
+  shippingFee?: number;
+}) {
   const { items, subtotal, totalItems } = useCart();
 
   if (items.length === 0) {
@@ -34,15 +41,21 @@ export function OrderSummary() {
         ))}
       </div>
 
-      <div className="flex justify-between border-t border-line pt-4 text-sm text-charcoal-soft">
-        <span>
-          Subtotal ({totalItems} item{totalItems === 1 ? "" : "s"})
-        </span>
-        <span>{formatINR(subtotal)}</span>
+      <div className="flex flex-col gap-2 border-t border-line pt-4 text-sm text-charcoal-soft">
+        <div className="flex justify-between">
+          <span>
+            Subtotal ({totalItems} item{totalItems === 1 ? "" : "s"})
+          </span>
+          <span>{formatINR(subtotal)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Shipping{deliveryMethod === "local" && " (self-pickup)"}</span>
+          <span>{shippingFee === 0 ? "Free" : formatINR(shippingFee)}</span>
+        </div>
       </div>
       <div className="flex justify-between font-medium text-charcoal">
         <span>Total</span>
-        <span>{formatINR(subtotal)}</span>
+        <span>{formatINR(subtotal + shippingFee)}</span>
       </div>
     </div>
   );

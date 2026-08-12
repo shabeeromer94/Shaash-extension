@@ -42,10 +42,8 @@ export function OrderConfirmationContent() {
             <span>Total</span>
             <span>{formatINR(summary.total)}</span>
           </div>
-          {/* PLACEHOLDER copy — update once Razorpay/payment collection is live. */}
           <p className="mt-4 text-xs text-taupe">
-            Payment isn&apos;t collected online yet — our team will reach out to confirm payment
-            and delivery details.
+            Payment received via Razorpay (test mode). We&apos;ll email you as your order ships.
           </p>
         </div>
       ) : (

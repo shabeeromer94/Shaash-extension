@@ -145,7 +145,16 @@ create table if not exists orders (
   order_number text unique not null default ('SHA-' || lpad(nextval('order_number_seq')::text, 6, '0')),
   customer_id uuid references customers (id) on delete set null,
 
-  -- Shipping snapshot, captured at checkout time.
+  -- "local" = self-pickup within Chennai (free, via the customer's own
+  -- Rapido/Porter), "courier" = shipped, with shipping_fee computed from
+  -- state + quantity. See lib/utils/shipping.ts for the fee formula.
+  delivery_method text not null default 'courier'
+    constraint orders_delivery_method_check check (delivery_method in ('local', 'courier')),
+
+  -- Shipping snapshot, captured at checkout time. For delivery_method =
+  -- 'local' these are filled with the pickup address (PICKUP_ADDRESS in
+  -- lib/utils/shipping.ts), not the customer's — there's nothing else to put
+  -- here since the columns are not null and no customer address is collected.
   shipping_name text not null,
   shipping_phone text not null,
   shipping_email text not null,
@@ -171,6 +180,23 @@ create table if not exists orders (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Migration for a database that already has `orders` from before
+-- delivery_method existed — `create table if not exists` above is a no-op
+-- there, so this adds the column/constraint explicitly. Safe to re-run, and
+-- a no-op on a fresh install (the create table above already has it).
+alter table orders add column if not exists delivery_method text not null default 'courier';
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'orders_delivery_method_check'
+  ) then
+    alter table orders
+      add constraint orders_delivery_method_check
+      check (delivery_method in ('local', 'courier'));
+  end if;
+end $$;
 
 create index if not exists orders_customer_id_idx on orders (customer_id);
 

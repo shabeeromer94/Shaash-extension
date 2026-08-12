@@ -1,14 +1,21 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { checkoutPayloadSchema } from "@/lib/validation/checkout";
+import { createRazorpayOrder, getRazorpayKeyId } from "@/lib/payments/razorpay";
+import { calculateShippingFee, PICKUP_ADDRESS } from "@/lib/utils/shipping";
 
 /**
  * Creates a guest order: find-or-create the customer, verify price/stock
- * server-side (never trust the client's cart), insert the order + items,
- * then decrement stock. No payment gateway call yet — orders are created
- * with status "pending_payment" so Razorpay can be wired in later without
- * changing this shape (see payment_provider/payment_status/payment_reference
- * on the orders table).
+ * server-side (never trust the client's cart), open a matching Razorpay
+ * order, then insert the order + items and decrement stock. The order row
+ * is written with status "pending_payment" / payment_status "pending" and
+ * only flips to "confirmed" / "paid" once /api/checkout/verify checks the
+ * signature Razorpay hands back after the customer actually pays.
+ *
+ * RAZORPAY_KEY_ID/SECRET are read from env — they're today's Test Mode
+ * keys; swapping to Live Mode keys once the Razorpay account is verified is
+ * an env var change, nothing here needs to change.
  */
 export async function POST(request: Request) {
   let body: unknown;
@@ -77,8 +84,32 @@ export async function POST(request: Request) {
   }
 
   const subtotal = orderItems.reduce((sum, item) => sum + item.line_total, 0);
-  const shippingFee = 0; // TODO: Razorpay + shipping-rules integration. Flat/free for now.
+  const totalQuantity = data.items.reduce((sum, item) => sum + item.quantity, 0);
+  // Recomputed here, never trusted from the client — same formula the
+  // checkout page uses for its live estimate (lib/utils/shipping.ts).
+  const shippingFee = calculateShippingFee({
+    deliveryMethod: data.deliveryMethod,
+    state: data.state ?? "",
+    totalQuantity,
+  });
   const total = subtotal + shippingFee;
+
+  // Open the Razorpay order before writing anything — if Razorpay is
+  // unreachable or misconfigured, fail here with no half-created order left behind.
+  let razorpayOrder;
+  try {
+    razorpayOrder = await createRazorpayOrder({
+      amountInPaise: Math.round(total * 100),
+      receipt: randomUUID(),
+      notes: { email: data.email },
+    });
+  } catch (error) {
+    console.error("[checkout] Razorpay order creation failed", error);
+    return NextResponse.json(
+      { error: "Could not start payment right now. Please try again in a moment." },
+      { status: 502 }
+    );
+  }
 
   // Find-or-create the customer by email (guest checkout — no login).
   const { data: existingCustomer } = await supabase
@@ -100,24 +131,31 @@ export async function POST(request: Request) {
     customerId = newCustomer.id;
   }
 
+  // "local" orders are self-pickup — there's no customer address to store,
+  // so the (not-null) shipping_* columns record our own pickup address instead.
+  const isLocalPickup = data.deliveryMethod === "local";
+
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
       customer_id: customerId,
+      delivery_method: data.deliveryMethod,
       shipping_name: data.name,
       shipping_phone: data.phone,
       shipping_email: data.email,
-      shipping_address_line1: data.addressLine1,
-      shipping_address_line2: data.addressLine2 || null,
-      shipping_city: data.city,
-      shipping_state: data.state,
-      shipping_pincode: data.pincode,
+      shipping_address_line1: isLocalPickup ? PICKUP_ADDRESS.line1 : data.addressLine1!,
+      shipping_address_line2: isLocalPickup ? PICKUP_ADDRESS.line2 : data.addressLine2 || null,
+      shipping_city: isLocalPickup ? PICKUP_ADDRESS.city : data.city!,
+      shipping_state: isLocalPickup ? PICKUP_ADDRESS.state : data.state!,
+      shipping_pincode: isLocalPickup ? PICKUP_ADDRESS.pincode : data.pincode!,
       subtotal,
       shipping_fee: shippingFee,
       total,
       notes: data.notes || null,
+      payment_reference: razorpayOrder.id,
       // status / payment_status / payment_provider all use their column
-      // defaults (pending_payment / pending / razorpay) until checkout is live.
+      // defaults (pending_payment / pending / razorpay) — flipped to
+      // confirmed/paid by /api/checkout/verify once payment is confirmed.
     })
     .select("id, order_number, total, status")
     .single();
@@ -149,5 +187,11 @@ export async function POST(request: Request) {
     orderNumber: order.order_number,
     total: order.total,
     status: order.status,
+    razorpay: {
+      orderId: razorpayOrder.id,
+      keyId: getRazorpayKeyId(),
+      amount: razorpayOrder.amount,
+      currency: razorpayOrder.currency,
+    },
   });
 }

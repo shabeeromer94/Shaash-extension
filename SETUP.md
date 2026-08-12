@@ -72,14 +72,32 @@ results instead of crashing. You'll see a `[queries/...] ... is Supabase set
 up?` message in the server logs when that happens — that's expected until
 step 1–2 above are done, not a bug.
 
-## 8. What's intentionally stubbed for later
+## 8. Set up Razorpay (test mode)
 
-- **Razorpay payments**: `/api/checkout` creates the order in the database
-  with `status = pending_payment` and `payment_status = pending`, but never
-  calls Razorpay. The order/customer/order_items schema already has the
-  columns a real integration needs (`payment_provider`, `payment_status`,
-  `payment_reference`). Search the repo for `TODO: Razorpay` to find the
-  integration point.
+Checkout is wired to Razorpay end-to-end: `/api/checkout` opens a Razorpay
+order, the browser opens Razorpay's Checkout modal, and `/api/checkout/verify`
+checks the payment signature server-side before marking the order
+`confirmed` / `paid`. No npm package involved — it's plain REST calls plus
+Node's `crypto` for signature verification.
+
+1. Create a free [Razorpay](https://dashboard.razorpay.com/signup) account.
+2. In the dashboard, make sure you're in **Test Mode** (toggle top-right).
+3. Go to **Settings → API Keys** and generate a Test key pair.
+4. Add both to `.env.local`:
+   ```
+   RAZORPAY_KEY_ID=rzp_test_...
+   RAZORPAY_KEY_SECRET=...
+   ```
+5. Restart `npm run dev`. Checkout now opens a real Razorpay modal — use
+   [Razorpay's test card numbers](https://razorpay.com/docs/payments/payments/test-card-details/)
+   (e.g. `4111 1111 1111 1111`, any future expiry, any CVV) to complete a
+   test payment.
+6. **Going live**: once your Razorpay account passes KYC/activation, generate
+   a Live Mode key pair from the same **Settings → API Keys** page and swap
+   the two env vars (locally and in Vercel's Project Settings → Environment
+   Variables). Nothing in the code changes — the key id/secret are read from
+   env on every request.
+
 - **Shipping cost**: currently hardcoded to ₹0 in `/api/checkout`. Replace
   with real shipping-rate logic when ready.
 - **Customer accounts**: guest checkout only — no login/signup, by your
@@ -94,7 +112,7 @@ should be reviewed/replaced with real brand info:
 - [src/app/about/page.tsx](src/app/about/page.tsx) — brand story, founder story, product philosophy, quality info (all bracketed placeholders).
 - [src/components/layout/Footer.tsx](src/components/layout/Footer.tsx) — real contact email/phone.
 - [src/components/home/WhyChooseUs.tsx](src/components/home/WhyChooseUs.tsx) and [src/components/home/TrustSection.tsx](src/components/home/TrustSection.tsx) — generic trust copy; confirm against your actual policies.
-- [src/components/checkout/CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [src/components/checkout/OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — "payment isn't live yet" messaging; update once Razorpay goes live.
+- Razorpay checkout copy already says "test mode" in [CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — drop that phrase from both once you've switched to Live Mode keys (step 8 above).
 - Hairstyle images (`hairstyles.image_url` in Supabase) are currently empty — the Shop by Hairstyle / Hairstyle Finder cards fall back to a plain styled card without a photo until you add one per row.
 
 ## Command reference
