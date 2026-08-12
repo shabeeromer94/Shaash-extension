@@ -1,4 +1,9 @@
-import { getAllProducts, getFeaturedProducts, getFilterOptions } from "@/lib/queries/products";
+import {
+  getAllProducts,
+  getFeaturedProducts,
+  getFilterOptions,
+  getProductByCode,
+} from "@/lib/queries/products";
 import { getAllHairstyles } from "@/lib/queries/hairstyles";
 import { Hero } from "@/components/home/Hero";
 import { ProductShowcase } from "@/components/home/ProductShowcase";
@@ -11,20 +16,20 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featured, allProducts, hairstyles, filterOptions] = await Promise.all([
+  const [featured, allProducts, hairstyles, filterOptions, heroProduct] = await Promise.all([
     getFeaturedProducts(8),
     getAllProducts(),
     getAllHairstyles(),
     getFilterOptions(),
+    getProductByCode("204"),
   ]);
 
-  const heroImages = featured
-    .slice(0, 2)
-    .map((product) => {
-      const image = product.images?.find((img) => img.is_primary) ?? product.images?.[0];
-      return image ? { src: image.image_url, alt: image.alt_text ?? product.name } : null;
-    })
-    .filter((img): img is { src: string; alt: string } => img !== null);
+  // The hero is a single gallery sourced from product 204's img-1, always shown full crop.
+  const heroImageRecord = heroProduct?.images?.find((img) => img.image_url.includes("img-1"));
+  const heroImage =
+    heroImageRecord && heroProduct
+      ? { src: heroImageRecord.image_url, alt: heroImageRecord.alt_text ?? heroProduct.name }
+      : undefined;
 
   const featuredForGrid = featured.slice(0, 4);
   const recommended = allProducts.filter((p) => !p.featured).slice(0, 4);
@@ -37,7 +42,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero images={heroImages} />
+      <Hero image={heroImage} />
       <ProductShowcase
         eyebrow="Best Sellers"
         title="Featured Hair Extensions"

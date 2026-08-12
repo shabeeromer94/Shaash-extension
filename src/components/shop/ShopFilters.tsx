@@ -1,6 +1,5 @@
 import type { FilterOptions, Hairstyle, ProductFilters } from "@/lib/types";
 import { Select } from "@/components/ui/Select";
-import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
 interface ShopFiltersProps {
@@ -50,25 +49,6 @@ export function ShopFilters({ options, hairstyles, activeFilters }: ShopFiltersP
           <option value="price_desc">Price: High to Low</option>
           <option value="newest">Newest</option>
         </Select>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-        <Input
-          label={`Min Price (₹${options.minPrice})`}
-          name="minPrice"
-          type="number"
-          min={0}
-          inputMode="numeric"
-          defaultValue={activeFilters.minPrice ?? ""}
-        />
-        <Input
-          label={`Max Price (₹${options.maxPrice})`}
-          name="maxPrice"
-          type="number"
-          min={0}
-          inputMode="numeric"
-          defaultValue={activeFilters.maxPrice ?? ""}
-        />
       </div>
 
       <div className="flex items-center gap-2">

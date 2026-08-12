@@ -5,6 +5,7 @@ import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { ShopFilters } from "@/components/shop/ShopFilters";
+import { HairstyleQuickLinks } from "@/components/shop/HairstyleQuickLinks";
 import type { ProductFilters } from "@/lib/types";
 
 export const revalidate = 60;
@@ -58,8 +59,9 @@ export default async function ShopPage({
           eyebrow="The Collection"
           title="Shop Hair Extensions"
           description={`${products.length} style${products.length === 1 ? "" : "s"} available`}
-          className="mb-10"
+          className="mb-8"
         />
+        <HairstyleQuickLinks hairstyles={hairstyles} activeSlug={filters.hairstyle} />
         <div className="grid gap-10 lg:grid-cols-[260px_1fr]">
           <ShopFilters options={filterOptions} hairstyles={hairstyles} activeFilters={filters} />
           <ProductGrid products={products} />

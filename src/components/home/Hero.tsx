@@ -7,10 +7,8 @@ interface HeroImage {
   alt: string;
 }
 
-/** Images are passed in from the page (derived from featured products), not hardcoded here. */
-export function Hero({ images = [] }: { images?: HeroImage[] }) {
-  const [primary, secondary] = images;
-
+/** Image is passed in from the page (derived from a featured product), not hardcoded here. */
+export function Hero({ image }: { image?: HeroImage }) {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-cream to-ivory">
       <Container className="grid gap-10 py-14 sm:py-20 lg:grid-cols-2 lg:items-center lg:py-28">
@@ -35,12 +33,12 @@ export function Hero({ images = [] }: { images?: HeroImage[] }) {
           </div>
         </div>
 
-        <div className="relative mx-auto grid w-full max-w-md grid-cols-2 gap-4">
-          {primary ? (
-            <div className="relative col-span-2 aspect-[4/3] overflow-hidden rounded-3xl bg-beige/40 sm:col-span-1 sm:aspect-[3/4]">
+        <div className="relative mx-auto w-full max-w-md">
+          {image ? (
+            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl bg-beige/40">
               <Image
-                src={primary.src}
-                alt={primary.alt}
+                src={image.src}
+                alt={image.alt}
                 fill
                 sizes="(min-width: 640px) 40vw, 80vw"
                 className="object-cover"
@@ -48,18 +46,7 @@ export function Hero({ images = [] }: { images?: HeroImage[] }) {
               />
             </div>
           ) : (
-            <div className="col-span-2 aspect-[4/3] rounded-3xl bg-beige/40 sm:col-span-1 sm:aspect-[3/4]" />
-          )}
-          {secondary && (
-            <div className="relative col-span-2 aspect-[4/3] overflow-hidden rounded-3xl bg-champagne/30 sm:col-span-1 sm:mt-10 sm:aspect-[3/4]">
-              <Image
-                src={secondary.src}
-                alt={secondary.alt}
-                fill
-                sizes="(min-width: 640px) 40vw, 80vw"
-                className="object-cover"
-              />
-            </div>
+            <div className="aspect-[4/5] rounded-3xl bg-beige/40" />
           )}
         </div>
       </Container>

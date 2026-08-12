@@ -53,3 +53,13 @@ body {
 .tracking-label {
   letter-spacing: 0.14em;
 }
+
+/* Hides the scrollbar on horizontally-scrollable shelves (e.g. hairstyle quick links)
+   while keeping the element scrollable via touch, trackpad, or drag. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

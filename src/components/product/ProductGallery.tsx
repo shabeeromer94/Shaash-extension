@@ -1,11 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { MouseEvent } from "react";
 import Image from "next/image";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Expand, X, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { ProductImage } from "@/lib/types";
+
+const ZOOM_SCALE = 2.2;
+
+/**
+ * The catalog's "main view" photo (always named img-1) is a fixed studio
+ * template: a front pose on the left, a ruler chart + length badge in the
+ * middle, and a back pose on the right, all baked into one file. We only want
+ * to lead with the front — the narrow aspect ratio below, combined with
+ * object-position "left", crops object-fit:cover to roughly that left third
+ * for every product without touching the source images.
+ */
+function isFrontBackComposite(image: ProductImage) {
+  return image.image_url.includes("img-1");
+}
 
 /**
  * Main image + thumbnail rail + lightbox. Deliberately makes no assumption
@@ -14,6 +29,9 @@ import type { ProductImage } from "@/lib/types";
 export function ProductGallery({ images, productName }: { images: ProductImage[]; productName: string }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+  const [origin, setOrigin] = useState({ x: 50, y: 50 });
+  const frameRef = useRef<HTMLDivElement>(null);
 
   if (images.length === 0) {
     return (
@@ -24,21 +42,52 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
   }
 
   const active = images[activeIndex];
+  const isComposite = isFrontBackComposite(active);
   const goTo = (delta: number) =>
     setActiveIndex((current) => (current + delta + images.length) % images.length);
+
+  // Zooming just scales the already-cropped content around the cursor — since
+  // object-position already excludes the ruler/back, panning can never reveal it.
+  function handleMouseMove(event: MouseEvent<HTMLDivElement>) {
+    const rect = frameRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setOrigin({
+      x: ((event.clientX - rect.left) / rect.width) * 100,
+      y: ((event.clientY - rect.top) / rect.height) * 100,
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4">
       <Dialog.Root open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-beige/40 sm:aspect-[4/5]">
+        <div
+          ref={frameRef}
+          className={cn(
+            "relative overflow-hidden rounded-2xl bg-beige/40",
+            isComposite ? "aspect-[11/24]" : "aspect-square sm:aspect-[4/5]"
+          )}
+          onMouseEnter={() => setZoomed(true)}
+          onMouseLeave={() => setZoomed(false)}
+          onMouseMove={handleMouseMove}
+        >
           <Image
             src={active.image_url}
             alt={active.alt_text ?? productName}
             fill
             priority
             sizes="(min-width: 1024px) 40vw, 100vw"
-            className="object-cover"
+            className={cn("object-cover transition-transform duration-300 ease-out", zoomed && "cursor-zoom-in")}
+            style={{
+              objectPosition: isComposite ? "left center" : "center",
+              transform: zoomed ? `scale(${ZOOM_SCALE})` : "scale(1)",
+              transformOrigin: `${origin.x}% ${origin.y}%`,
+            }}
           />
+          {!zoomed && (
+            <div className="pointer-events-none absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-ivory/90 text-charcoal shadow-sm">
+              <ZoomIn className="h-4 w-4" />
+            </div>
+          )}
           <Dialog.Trigger
             className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-ivory/90 text-charcoal shadow-sm transition-colors hover:bg-ivory"
             aria-label="View larger image"
