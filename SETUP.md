@@ -109,11 +109,9 @@ Node's `crypto` for signature verification.
 Search the repo for `PLACEHOLDER` to find every spot with generic copy that
 should be reviewed/replaced with real brand info:
 
-- [src/app/about/page.tsx](src/app/about/page.tsx) — brand story, founder story, product philosophy, quality info (all bracketed placeholders).
-- [src/components/layout/Footer.tsx](src/components/layout/Footer.tsx) — real contact email/phone.
+- [src/components/layout/Footer.tsx](src/components/layout/Footer.tsx) — real support email (the WhatsApp number is already real).
 - [src/components/home/WhyChooseUs.tsx](src/components/home/WhyChooseUs.tsx) and [src/components/home/TrustSection.tsx](src/components/home/TrustSection.tsx) — generic trust copy; confirm against your actual policies.
 - Razorpay checkout copy already says "test mode" in [CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — drop that phrase from both once you've switched to Live Mode keys (step 8 above).
-- Hairstyle images (`hairstyles.image_url` in Supabase) are currently empty — the Shop by Hairstyle / Hairstyle Finder cards fall back to a plain styled card without a photo until you add one per row.
 
 ## Command reference
 

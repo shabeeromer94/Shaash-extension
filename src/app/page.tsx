@@ -43,6 +43,7 @@ export default async function HomePage() {
   return (
     <>
       <Hero image={heroImage} />
+      <ShopByHairstyle hairstyles={hairstyles} />
       <ProductShowcase
         eyebrow="Best Sellers"
         title="Featured Hair Extensions"
@@ -51,7 +52,6 @@ export default async function HomePage() {
         ctaHref="/shop"
         ctaLabel="View All Products"
       />
-      <ShopByHairstyle hairstyles={hairstyles} />
       <ShopByTexture textures={textureGroups} />
       <WhyChooseUs />
       <ProductShowcase

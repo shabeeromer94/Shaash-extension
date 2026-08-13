@@ -16,12 +16,15 @@ export function ShopByHairstyle({ hairstyles }: { hairstyles: Hairstyle[] }) {
           title="Shop by Hairstyle"
           description="Not sure what to pick? Start from the hairstyle you're going for."
         />
-        <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        {/* Mobile: a horizontal scroll shelf (same interaction as the hairstyle
+            quick-links on /shop) — fixed-width snap-aligned cards. From sm up,
+            it switches to a regular grid with cards filling their own cell. */}
+        <div className="mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-hide pb-2 sm:grid sm:grid-cols-3 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
           {hairstyles.map((style) => (
             <Link
               key={style.id}
               href={`/hairstyles?style=${style.slug}`}
-              className="group flex flex-col overflow-hidden rounded-2xl border-2 border-transparent bg-beige/50 transition-colors hover:border-taupe/60"
+              className="group flex w-40 shrink-0 snap-start flex-col overflow-hidden rounded-2xl border-2 border-transparent bg-beige/50 transition-colors hover:border-taupe/60 sm:w-auto sm:shrink"
             >
               {/* aspect-[3/5] is close to these reference photos' own portrait proportions —
                   object-contain shows the whole photo uncropped instead of cutting off detail. */}

@@ -14,6 +14,7 @@ const FOOTER_LINKS = [
     title: "Company",
     links: [
       { href: "/about", label: "About SHAASH" },
+      { href: "/delivery-returns", label: "Delivery & Returns" },
       { href: "/cart", label: "Cart" },
     ],
   },
