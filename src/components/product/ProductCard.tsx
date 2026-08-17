@@ -46,7 +46,7 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         )}
         <div className="absolute right-3 top-3">
-          <StockBadge status={status} />
+          <StockBadge status={status} size="sm" />
         </div>
       </div>
       <div className="mt-4 flex items-start justify-between gap-2">

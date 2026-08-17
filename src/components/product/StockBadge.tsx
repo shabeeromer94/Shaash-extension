@@ -9,6 +9,10 @@ const TONE: Record<AvailabilityStatus, "success" | "warning" | "danger" | "neutr
   hidden: "neutral",
 };
 
-export function StockBadge({ status }: { status: AvailabilityStatus }) {
-  return <Badge tone={TONE[status]}>{AVAILABILITY_LABEL[status]}</Badge>;
+export function StockBadge({ status, size = "md" }: { status: AvailabilityStatus; size?: "sm" | "md" }) {
+  return (
+    <Badge tone={TONE[status]} size={size}>
+      {AVAILABILITY_LABEL[status]}
+    </Badge>
+  );
 }
