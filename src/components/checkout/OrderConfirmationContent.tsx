@@ -43,7 +43,9 @@ export function OrderConfirmationContent() {
             <span>{formatINR(summary.total)}</span>
           </div>
           <p className="mt-4 text-xs text-taupe">
-            Payment received via Razorpay (test mode). We&apos;ll email you as your order ships.
+            {summary.isLive
+              ? "Payment received via Razorpay. We'll email you as your order ships."
+              : "Payment received via Razorpay (test mode). We'll email you as your order ships."}
           </p>
         </div>
       ) : (

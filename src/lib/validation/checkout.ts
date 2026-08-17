@@ -3,14 +3,17 @@ import type { DeliveryMethod } from "@/lib/utils/shipping";
 
 /**
  * Address fields are optional at the schema-shape level and conditionally
- * required by requireCourierAddress below — "local" (within Chennai) orders
- * are self-pickup, so no delivery address is collected for them. Keeping the
- * shape flat (rather than a discriminated union) keeps react-hook-form's
- * `register()` typing simple, since every field name is always valid.
+ * required by validateCheckoutFields below — "local" (within Chennai) orders
+ * are self-pickup, so no delivery address is collected for them. Email is
+ * required for courier orders (used for shipping confirmation) but optional
+ * for local pickup — if one is given, it still has to be a valid address.
+ * Keeping the shape flat (rather than a discriminated union) keeps
+ * react-hook-form's `register()` typing simple, since every field name is
+ * always valid.
  */
 const baseCheckoutFields = z.object({
   name: z.string().min(2, "Enter your full name"),
-  email: z.string().email("Enter a valid email address"),
+  email: z.string().optional(),
   phone: z.string().min(10, "Enter a valid 10-digit phone number").max(15, "Phone number is too long"),
   deliveryMethod: z.enum(["local", "courier"]),
   addressLine1: z.string().optional(),
@@ -21,9 +24,12 @@ const baseCheckoutFields = z.object({
   notes: z.string().optional(),
 });
 
-function requireCourierAddress(
+const EMAIL_SHAPE = z.string().email();
+
+function validateCheckoutFields(
   data: {
     deliveryMethod: DeliveryMethod;
+    email?: string;
     addressLine1?: string;
     city?: string;
     state?: string;
@@ -31,6 +37,12 @@ function requireCourierAddress(
   },
   ctx: z.RefinementCtx
 ) {
+  if (data.deliveryMethod === "courier" && !data.email) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["email"], message: "Enter your email address" });
+  } else if (data.email && !EMAIL_SHAPE.safeParse(data.email).success) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["email"], message: "Enter a valid email address" });
+  }
+
   if (data.deliveryMethod !== "courier") return;
   if (!data.addressLine1 || data.addressLine1.length < 5) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["addressLine1"], message: "Enter your delivery address" });
@@ -47,7 +59,7 @@ function requireCourierAddress(
 }
 
 /** Client-side form schema — matches the fields on the checkout page. */
-export const checkoutFormSchema = baseCheckoutFields.superRefine(requireCourierAddress);
+export const checkoutFormSchema = baseCheckoutFields.superRefine(validateCheckoutFields);
 
 export type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
 
@@ -63,7 +75,7 @@ export const checkoutPayloadSchema = baseCheckoutFields
       )
       .min(1, "Your cart is empty."),
   })
-  .superRefine(requireCourierAddress);
+  .superRefine(validateCheckoutFields);
 
 export type CheckoutPayloadInput = z.infer<typeof checkoutPayloadSchema>;
 

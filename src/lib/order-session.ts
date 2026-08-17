@@ -13,6 +13,7 @@ export interface LastOrderSummary {
   total: number;
   status: string;
   itemCount: number;
+  isLive: boolean;
 }
 
 export function saveLastOrder(summary: LastOrderSummary) {

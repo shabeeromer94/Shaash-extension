@@ -17,14 +17,17 @@ interface PendingPayment {
   orderNumber: string;
   total: number;
   itemCount: number;
-  razorpay: { orderId: string; keyId: string; amount: number; currency: string };
+  razorpay: { orderId: string; keyId: string; amount: number; currency: string; isLive: boolean };
 }
 
 export function CheckoutForm({
   onSummaryChange,
+  isLiveMode = false,
 }: {
   /** Fires on every relevant change so OrderSummary (a sibling) can show a live shipping estimate. */
   onSummaryChange?: (summary: { deliveryMethod: DeliveryMethod; shippingFee: number }) => void;
+  /** Whether the configured Razorpay keys are Live Mode — computed server-side in app/checkout/page.tsx. */
+  isLiveMode?: boolean;
 }) {
   const { items, totalItems, clearCart } = useCart();
   const router = useRouter();
@@ -84,6 +87,7 @@ export function CheckoutForm({
         total: result.total,
         status: result.status,
         itemCount: pending.itemCount,
+        isLive: pending.razorpay.isLive,
       });
       clearCart();
       router.push(`/checkout/confirmation/${result.orderNumber}`);
@@ -93,7 +97,7 @@ export function CheckoutForm({
     }
   }
 
-  function launchPayment(pending: PendingPayment, prefill: { name: string; email: string; phone: string }) {
+  function launchPayment(pending: PendingPayment, prefill: { name: string; email?: string; phone: string }) {
     setSubmitError(null);
     setSubmitting(true);
     openRazorpayCheckout({
@@ -196,7 +200,7 @@ export function CheckoutForm({
           </label>
         </div>
 
-        {deliveryMethod === "local" ? (
+        {deliveryMethod === "local" && (
           <div className="rounded-xl bg-cream p-4 text-sm text-charcoal-soft">
             <p className="font-medium text-charcoal">Pickup address</p>
             <p className="mt-1">{PICKUP_ADDRESS.line1}</p>
@@ -208,11 +212,6 @@ export function CheckoutForm({
               charge.
             </p>
           </div>
-        ) : (
-          <p className="text-xs text-taupe">
-            ₹120 base fare within Tamil Nadu (₹140 outside), plus ₹10 per additional item — calculated from the
-            state you enter below.
-          </p>
         )}
       </fieldset>
 
@@ -222,7 +221,7 @@ export function CheckoutForm({
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <Input
-            label="Email"
+            label={deliveryMethod === "local" ? "Email (optional)" : "Email"}
             type="email"
             autoComplete="email"
             {...register("email")}
@@ -280,7 +279,9 @@ export function CheckoutForm({
       {submitError && <p className="text-sm text-red-600">{submitError}</p>}
 
       <div className="rounded-xl bg-beige/50 px-4 py-3 text-sm text-charcoal-soft">
-        Payment is handled securely by Razorpay (test mode) — no live charge is made yet.
+        {isLiveMode
+          ? "Payment is handled securely by Razorpay."
+          : "Payment is handled securely by Razorpay (test mode) — no live charge is made yet."}
       </div>
 
       {pendingPayment ? (

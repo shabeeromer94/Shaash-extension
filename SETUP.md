@@ -10,6 +10,7 @@ here requires touching code.
 2. Once the project is ready, open **SQL Editor** in the left sidebar.
 3. Open [`supabase/schema.sql`](supabase/schema.sql) from this repo, paste its full contents into a new query, and run it. This creates every table, index, trigger and RLS policy.
 4. Open [`supabase/seed.sql`](supabase/seed.sql), paste it into a new query, and run it. This loads the 8 starter products, categories, hairstyles, and inspiration content. Safe to re-run.
+   - `schema.sql` itself is also safe to re-run any time — whenever you pull code that touches it (new columns, new migration blocks), just re-run the whole file in the SQL Editor again. Existing tables/data are left alone; only the new bits get applied.
 5. Go to **Project Settings → API**. You'll need three values from this page in the next step:
    - **Project URL**
    - **anon public** key
@@ -97,6 +98,16 @@ Node's `crypto` for signature verification.
    the two env vars (locally and in Vercel's Project Settings → Environment
    Variables). Nothing in the code changes — the key id/secret are read from
    env on every request.
+
+   The "(test mode)" wording on the checkout and confirmation pages is
+   **not** hardcoded — it's computed from whether `RAZORPAY_KEY_ID` starts
+   with `rzp_live_` vs `rzp_test_`. If the site still shows "test mode"
+   after you've generated live keys, it means the `rzp_live_...` pair hasn't
+   actually been set yet in whichever environment you're looking at:
+   `.env.local` for `npm run dev`, or Vercel's **Project Settings →
+   Environment Variables** (Production) for the deployed site — these are
+   separate, updating one doesn't update the other. Redeploy (or restart
+   `npm run dev`) after changing either.
 
 - **Shipping cost**: currently hardcoded to ₹0 in `/api/checkout`. Replace
   with real shipping-rate logic when ready.

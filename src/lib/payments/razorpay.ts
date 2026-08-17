@@ -64,6 +64,11 @@ export function getRazorpayKeyId(): string {
   return getCredentials().keyId;
 }
 
+/** Whether the configured key pair is Razorpay Live Mode rather than Test Mode — live key ids start with "rzp_live_". */
+export function isRazorpayLiveMode(): boolean {
+  return getCredentials().keyId.startsWith("rzp_live_");
+}
+
 /**
  * Verifies the signature Razorpay Checkout hands back on a successful
  * payment: HMAC-SHA256(order_id + "|" + payment_id, key_secret) must match

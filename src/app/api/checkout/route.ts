@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { checkoutPayloadSchema } from "@/lib/validation/checkout";
-import { createRazorpayOrder, getRazorpayKeyId } from "@/lib/payments/razorpay";
+import { createRazorpayOrder, getRazorpayKeyId, isRazorpayLiveMode } from "@/lib/payments/razorpay";
 import { calculateShippingFee, PICKUP_ADDRESS } from "@/lib/utils/shipping";
 
 /**
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     razorpayOrder = await createRazorpayOrder({
       amountInPaise: Math.round(total * 100),
       receipt: randomUUID(),
-      notes: { email: data.email },
+      notes: data.email ? { email: data.email } : undefined,
     });
   } catch (error) {
     console.error("[checkout] Razorpay order creation failed", error);
@@ -111,18 +111,24 @@ export async function POST(request: Request) {
     );
   }
 
-  // Find-or-create the customer by email (guest checkout — no login).
-  const { data: existingCustomer } = await supabase
-    .from("customers")
-    .select("id")
-    .eq("email", data.email)
-    .maybeSingle();
+  // Find-or-create the customer by email (guest checkout — no login). Email
+  // is optional for local self-pickup orders, so only dedupe by email when
+  // one was actually given — otherwise every no-email guest would collapse
+  // into a single shared customer row.
+  let customerId: string | undefined;
+  if (data.email) {
+    const { data: existingCustomer } = await supabase
+      .from("customers")
+      .select("id")
+      .eq("email", data.email)
+      .maybeSingle();
+    customerId = existingCustomer?.id;
+  }
 
-  let customerId = existingCustomer?.id as string | undefined;
   if (!customerId) {
     const { data: newCustomer, error: customerError } = await supabase
       .from("customers")
-      .insert({ name: data.name, email: data.email, phone: data.phone })
+      .insert({ name: data.name, email: data.email || null, phone: data.phone })
       .select("id")
       .single();
     if (customerError || !newCustomer) {
@@ -142,7 +148,7 @@ export async function POST(request: Request) {
       delivery_method: data.deliveryMethod,
       shipping_name: data.name,
       shipping_phone: data.phone,
-      shipping_email: data.email,
+      shipping_email: data.email || null,
       shipping_address_line1: isLocalPickup ? PICKUP_ADDRESS.line1 : data.addressLine1!,
       shipping_address_line2: isLocalPickup ? PICKUP_ADDRESS.line2 : data.addressLine2 || null,
       shipping_city: isLocalPickup ? PICKUP_ADDRESS.city : data.city!,
@@ -192,6 +198,7 @@ export async function POST(request: Request) {
       keyId: getRazorpayKeyId(),
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
+      isLive: isRazorpayLiveMode(),
     },
   });
 }

@@ -128,10 +128,15 @@ create table if not exists hairstyle_inspiration_products (
 create table if not exists customers (
   id uuid primary key default gen_random_uuid(),
   name text not null,
-  email text not null,
+  email text,                                 -- optional: local self-pickup orders may not collect one
   phone text not null,
   created_at timestamptz not null default now()
 );
+
+-- Migration for a database that already has `email` as NOT NULL from before
+-- it became optional for local self-pickup orders. Safe to re-run (a no-op
+-- once already nullable).
+alter table customers alter column email drop not null;
 
 create index if not exists customers_email_idx on customers (email);
 
@@ -157,7 +162,7 @@ create table if not exists orders (
   -- here since the columns are not null and no customer address is collected.
   shipping_name text not null,
   shipping_phone text not null,
-  shipping_email text not null,
+  shipping_email text,                        -- optional: local self-pickup orders may not collect one
   shipping_address_line1 text not null,
   shipping_address_line2 text,
   shipping_city text not null,
@@ -197,6 +202,11 @@ begin
       check (delivery_method in ('local', 'courier'));
   end if;
 end $$;
+
+-- Migration for a database that already has `shipping_email` as NOT NULL
+-- from before email became optional for local self-pickup orders. Safe to
+-- re-run (a no-op once already nullable).
+alter table orders alter column shipping_email drop not null;
 
 create index if not exists orders_customer_id_idx on orders (customer_id);
 
