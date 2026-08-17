@@ -14,8 +14,11 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ivory/95 backdrop-blur-sm">
       <Container className="flex h-16 items-center justify-between sm:h-20">
-        <Link href="/" className="font-display text-2xl tracking-wide text-charcoal sm:text-3xl">
-          SHAASH
+        <Link href="/" className="flex flex-col leading-none">
+          <span className="font-display text-2xl tracking-wide text-charcoal sm:text-3xl">SHAASH</span>
+          <span className="mt-1 text-[9px] font-medium uppercase tracking-label text-charcoal-soft sm:text-[10px]">
+            Bridal Beauty Store
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">

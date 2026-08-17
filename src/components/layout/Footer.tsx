@@ -26,6 +26,9 @@ export function Footer() {
       <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2">
           <p className="font-display text-2xl text-charcoal">SHAASH</p>
+          <p className="mt-1 text-[10px] font-medium uppercase tracking-label text-charcoal-soft">
+            Bridal Beauty Store
+          </p>
           <p className="mt-3 max-w-sm text-sm leading-relaxed text-charcoal-soft">
             {/* PLACEHOLDER: replace with the SHAASH Beauty Store brand statement. */}
             Premium synthetic hair extensions and hair accessories, made for effortless everyday
