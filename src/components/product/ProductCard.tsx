@@ -45,7 +45,7 @@ export function ProductCard({ product }: { product: Product }) {
             Image coming soon
           </div>
         )}
-        <div className="absolute left-3 top-3">
+        <div className="absolute right-3 top-3">
           <StockBadge status={status} />
         </div>
       </div>
