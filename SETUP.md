@@ -124,6 +124,22 @@ should be reviewed/replaced with real brand info:
 - [src/components/home/WhyChooseUs.tsx](src/components/home/WhyChooseUs.tsx) and [src/components/home/TrustSection.tsx](src/components/home/TrustSection.tsx) — generic trust copy; confirm against your actual policies.
 - Razorpay checkout copy already says "test mode" in [CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — drop that phrase from both once you've switched to Live Mode keys (step 8 above).
 
+## 10. Browsing orders
+
+The raw `orders` table mixes fulfilment fields (name, address, phone) with
+bookkeeping ones (payment ids, timestamps) in no particular order, and
+doesn't show what was actually purchased (that's in a separate
+`order_items` table). For a cleaner view, use the **`order_summary`** view
+instead — it's created by `schema.sql`, so re-run that file in the SQL
+Editor if you set up your database before this existed.
+
+In Supabase: **Table Editor → order_summary**. It surfaces, in this order:
+`order_number`, `customer_name`, `phone`, `delivery_method`, `full_address`,
+`products_ordered` — then every other order field afterward. It's read-only
+and only visible from the dashboard/SQL Editor (not the public API), so it's
+safe to browse without affecting the storefront or exposing customer data
+publicly.
+
 ## Command reference
 
 ```powershell

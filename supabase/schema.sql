@@ -300,3 +300,67 @@ create policy "Public read inspiration_products" on hairstyle_inspiration_produc
 -- No policies on customers / orders / order_items: RLS enabled + zero
 -- policies means anon/authenticated roles get zero rows, in both
 -- directions, unconditionally. Only the service role bypasses RLS.
+
+-- =====================================================================
+-- order_summary — a read-only view for browsing orders in the Supabase
+-- Table Editor. Raw `orders` mixes fulfilment-critical fields (who, where,
+-- what) with bookkeeping ones (payment ids, timestamps, internal uuids) in
+-- an arbitrary column order, and has no single place to see what was
+-- actually ordered (that's in the separate order_items table). This view
+-- puts the fields you need at a glance first — customer name, phone,
+-- delivery method, full address, products ordered — with everything else
+-- after. It changes nothing about `orders`/`order_items` themselves and
+-- nothing in the app queries it; it's purely for looking things up.
+--
+-- `security_invoker = true` (Postgres 15+) makes this view enforce the
+-- querying role's own RLS, same as querying `orders` directly, rather than
+-- running with the view creator's privileges — without it, a view can
+-- silently bypass RLS for anyone who can query it. The REVOKE below is a
+-- second, independent layer: it stops PostgREST (anon/authenticated, i.e.
+-- the public API) from ever reaching this view at all, so it's only
+-- browsable from the Supabase dashboard / SQL Editor, not the storefront.
+-- =====================================================================
+
+create or replace view order_summary
+with (security_invoker = true)
+as
+select
+  o.order_number,
+  o.shipping_name as customer_name,
+  o.shipping_phone as phone,
+  o.delivery_method,
+  concat_ws(
+    ', ',
+    o.shipping_address_line1,
+    o.shipping_address_line2,
+    o.shipping_city,
+    o.shipping_state,
+    o.shipping_pincode
+  ) as full_address,
+  coalesce(items.products_ordered, '') as products_ordered,
+
+  -- Everything else — still here, just not first.
+  o.status,
+  o.payment_status,
+  o.total,
+  o.subtotal,
+  o.shipping_fee,
+  o.payment_provider,
+  o.payment_reference,
+  o.shipping_email as email,
+  o.notes,
+  o.created_at,
+  o.updated_at,
+  o.id as order_id,
+  o.customer_id
+from orders o
+left join (
+  select
+    order_id,
+    string_agg('#' || product_code || ' ' || product_name || ' x' || quantity, '; ' order by created_at) as products_ordered
+  from order_items
+  group by order_id
+) items on items.order_id = o.id
+order by o.created_at desc;
+
+revoke all on order_summary from anon, authenticated;
