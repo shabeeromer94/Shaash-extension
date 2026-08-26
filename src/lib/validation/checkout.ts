@@ -24,6 +24,18 @@ const baseCheckoutFields = z.object({
   notes: z.string().optional(),
 });
 
+/** Base fields + cart contents — the shape shared by /api/checkout and /api/checkout/verify. */
+const checkoutPayloadShape = baseCheckoutFields.extend({
+  items: z
+    .array(
+      z.object({
+        productCode: z.string().min(1),
+        quantity: z.number().int().positive(),
+      })
+    )
+    .min(1, "Your cart is empty."),
+});
+
 const EMAIL_SHAPE = z.string().email();
 
 function validateCheckoutFields(
@@ -63,28 +75,24 @@ export const checkoutFormSchema = baseCheckoutFields.superRefine(validateCheckou
 
 export type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
 
-/** Server-side payload schema — the form fields plus the cart contents. */
-export const checkoutPayloadSchema = baseCheckoutFields
-  .extend({
-    items: z
-      .array(
-        z.object({
-          productCode: z.string().min(1),
-          quantity: z.number().int().positive(),
-        })
-      )
-      .min(1, "Your cart is empty."),
-  })
-  .superRefine(validateCheckoutFields);
+/** /api/checkout payload — starts a Razorpay payment. Writes nothing to the database. */
+export const checkoutPayloadSchema = checkoutPayloadShape.superRefine(validateCheckoutFields);
 
 export type CheckoutPayloadInput = z.infer<typeof checkoutPayloadSchema>;
 
-/** What the client sends back after Razorpay Checkout's `handler` fires on a successful payment. */
-export const razorpayVerifySchema = z.object({
-  orderNumber: z.string().min(1),
-  razorpayOrderId: z.string().min(1),
-  razorpayPaymentId: z.string().min(1),
-  razorpaySignature: z.string().min(1),
-});
+/**
+ * /api/checkout/verify payload — the same checkout fields + cart resent
+ * alongside what Razorpay Checkout's `handler` hands back on a successful
+ * payment. Resending the full form (rather than just an order id) is what
+ * lets the order be created here, for the first time, only once payment is
+ * actually confirmed — see /api/checkout/verify for why.
+ */
+export const razorpayVerifySchema = checkoutPayloadShape
+  .extend({
+    razorpayOrderId: z.string().min(1),
+    razorpayPaymentId: z.string().min(1),
+    razorpaySignature: z.string().min(1),
+  })
+  .superRefine(validateCheckoutFields);
 
 export type RazorpayVerifyInput = z.infer<typeof razorpayVerifySchema>;

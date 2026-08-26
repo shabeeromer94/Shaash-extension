@@ -23,7 +23,7 @@ export function ShopByHairstyle({ hairstyles }: { hairstyles: Hairstyle[] }) {
           {hairstyles.map((style) => (
             <Link
               key={style.id}
-              href={`/hairstyles?style=${style.slug}`}
+              href={`/hairstyles?style=${style.slug}#results`}
               className="group flex w-40 shrink-0 snap-start flex-col overflow-hidden rounded-2xl border-2 border-transparent bg-beige/50 transition-colors hover:border-taupe/60 sm:w-auto sm:shrink"
             >
               {/* aspect-[3/5] is close to these reference photos' own portrait proportions —

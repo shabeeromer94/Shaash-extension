@@ -14,7 +14,6 @@ import { Input, Textarea } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
 interface PendingPayment {
-  orderNumber: string;
   total: number;
   itemCount: number;
   razorpay: { orderId: string; keyId: string; amount: number; currency: string; isLive: boolean };
@@ -33,9 +32,11 @@ export function CheckoutForm({
   const router = useRouter();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // Set once /api/checkout has created the order + Razorpay order. From here
-  // on, a dismissed/failed payment retries against this SAME order — it never
-  // resubmits the form, which would create a second order and double-decrement stock.
+  // Set once /api/checkout has opened a Razorpay order. No order exists in
+  // our database yet at this point — only /api/checkout/verify creates one,
+  // and only once payment is confirmed. From here on, a dismissed/failed
+  // payment retries against this SAME Razorpay order rather than resubmitting
+  // the form (which would open a second, redundant one).
   const [pendingPayment, setPendingPayment] = useState<PendingPayment | null>(null);
 
   const {
@@ -62,13 +63,18 @@ export function CheckoutForm({
     });
   }, [deliveryMethod, stateValue, totalItems, onSummaryChange]);
 
-  async function verifyAndFinish(response: RazorpaySuccessResponse, pending: PendingPayment) {
+  async function verifyAndFinish(
+    response: RazorpaySuccessResponse,
+    pending: PendingPayment,
+    values: CheckoutFormValues
+  ) {
     try {
       const verifyRes = await fetch("/api/checkout/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          orderNumber: pending.orderNumber,
+          ...values,
+          items: items.map((item) => ({ productCode: item.productCode, quantity: item.quantity })),
           razorpayOrderId: response.razorpay_order_id,
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
@@ -97,7 +103,7 @@ export function CheckoutForm({
     }
   }
 
-  function launchPayment(pending: PendingPayment, prefill: { name: string; email?: string; phone: string }) {
+  function launchPayment(pending: PendingPayment, values: CheckoutFormValues) {
     setSubmitError(null);
     setSubmitting(true);
     openRazorpayCheckout({
@@ -105,15 +111,15 @@ export function CheckoutForm({
       amount: pending.razorpay.amount,
       currency: pending.razorpay.currency,
       name: "SHAASH Beauty Store",
-      description: `Order ${pending.orderNumber}`,
+      description: "Hair Extensions Order",
       order_id: pending.razorpay.orderId,
-      prefill: { name: prefill.name, email: prefill.email, contact: prefill.phone },
+      prefill: { name: values.name, email: values.email, contact: values.phone },
       theme: { color: "#2a231d" },
-      handler: (response) => verifyAndFinish(response, pending),
+      handler: (response) => verifyAndFinish(response, pending, values),
       modal: {
         ondismiss: () => {
           setSubmitting(false);
-          setSubmitError("Payment window closed before completing — your order is saved, you can retry below.");
+          setSubmitError("Payment window closed before completing — you haven't been charged. Feel free to try again.");
         },
       },
     }).then((instance) => {
@@ -152,7 +158,6 @@ export function CheckoutForm({
       }
 
       const pending: PendingPayment = {
-        orderNumber: result.orderNumber,
         total: result.total,
         itemCount: totalItems,
         razorpay: result.razorpay,
@@ -286,7 +291,7 @@ export function CheckoutForm({
 
       {pendingPayment ? (
         <Button type="button" size="lg" onClick={retryPayment} disabled={submitting}>
-          {submitting ? "Opening Payment..." : `Retry Payment — Order #${pendingPayment.orderNumber}`}
+          {submitting ? "Opening Payment..." : "Retry Payment"}
         </Button>
       ) : (
         <Button type="submit" size="lg" disabled={submitting}>

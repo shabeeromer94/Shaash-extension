@@ -76,10 +76,16 @@ step 1–2 above are done, not a bug.
 ## 8. Set up Razorpay (test mode)
 
 Checkout is wired to Razorpay end-to-end: `/api/checkout` opens a Razorpay
-order, the browser opens Razorpay's Checkout modal, and `/api/checkout/verify`
-checks the payment signature server-side before marking the order
-`confirmed` / `paid`. No npm package involved — it's plain REST calls plus
+order (writing nothing to Supabase yet), the browser opens Razorpay's
+Checkout modal, and only once `/api/checkout/verify` confirms the payment
+signature server-side does it create the actual order — as `confirmed` /
+`paid` directly. No npm package involved — it's plain REST calls plus
 Node's `crypto` for signature verification.
+
+This means a failed, cancelled, or abandoned payment never creates an order
+row or touches stock — there's nothing to clean up in Supabase for it. The
+customer just lands back on the checkout page with an error and a "Retry
+Payment" button, reusing the same Razorpay order rather than starting over.
 
 1. Create a free [Razorpay](https://dashboard.razorpay.com/signup) account.
 2. In the dashboard, make sure you're in **Test Mode** (toggle top-right).
@@ -115,7 +121,39 @@ Node's `crypto` for signature verification.
   earlier choice. The `customers` table just captures whoever checks out.
 - **Admin panel**: none yet — use the Supabase Table Editor (see above).
 
-## 9. Content placeholders to fill in before launch
+## 9. Get order notifications on Telegram (optional)
+
+Every time a payment is verified, `/api/checkout/verify` sends a message —
+customer name, phone, full address, and the products ordered — to a
+Telegram chat of your choice. It's entirely optional: if it's not
+configured, checkout just skips this step silently.
+
+1. **Create a bot**: message [@BotFather](https://t.me/BotFather) on
+   Telegram, send `/newbot`, and follow the prompts. It replies with a
+   token that looks like `123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` —
+   that's `TELEGRAM_BOT_TOKEN`.
+2. **Get your chat id**:
+   - For a personal chat: open a chat with your new bot and send it any
+     message first (bots can't message you until you've messaged them).
+     Then visit `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates` in a
+     browser — your chat id is the number at `result[0].message.chat.id`.
+   - For a group: add the bot to the group, send a message in the group,
+     then visit the same URL — the group's chat id will be a negative
+     number.
+3. Add both to `.env.local`:
+   ```
+   TELEGRAM_BOT_TOKEN=123456789:AAExxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TELEGRAM_CHAT_ID=your-chat-id
+   ```
+4. Restart `npm run dev` (or redeploy, if setting this in Vercel). Complete
+   a test payment — you should get a message within a couple of seconds of
+   landing on the confirmation page.
+
+Since this only fires from `/api/checkout/verify`, you'll only ever be
+notified for orders that were actually paid — never for failed or abandoned
+payments.
+
+## 10. Content placeholders to fill in before launch
 
 Search the repo for `PLACEHOLDER` to find every spot with generic copy that
 should be reviewed/replaced with real brand info:
@@ -124,7 +162,7 @@ should be reviewed/replaced with real brand info:
 - [src/components/home/WhyChooseUs.tsx](src/components/home/WhyChooseUs.tsx) and [src/components/home/TrustSection.tsx](src/components/home/TrustSection.tsx) — generic trust copy; confirm against your actual policies.
 - Razorpay checkout copy already says "test mode" in [CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — drop that phrase from both once you've switched to Live Mode keys (step 8 above).
 
-## 10. Browsing orders
+## 11. Browsing orders
 
 The raw `orders` table mixes fulfilment fields (name, address, phone) with
 bookkeeping ones (payment ids, timestamps) in no particular order, and
