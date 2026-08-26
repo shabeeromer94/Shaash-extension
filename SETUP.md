@@ -45,9 +45,32 @@ no products" below).
 1. Go to [vercel.com](https://vercel.com), sign in, and "Import Project" from your GitHub repo (`shabeeromer94/Shaash-extension`).
 2. In the import screen (or Project Settings → Environment Variables afterward), add the same three variables from step 2, for **Production**, **Preview**, and **Development** environments.
 3. Deploy. Every push to `main` will auto-redeploy.
-4. Optional: set `NEXT_PUBLIC_SITE_URL` to your real Vercel/custom domain — it's used for SEO tags (Open Graph, canonical-style metadata).
+4. Set `NEXT_PUBLIC_SITE_URL` to whatever's actually live right now (the `*.vercel.app` URL Vercel gives you, or `https://shaashbeautystore.com` once step 5 below is done) — it's used for SEO tags (Open Graph, canonical-style metadata).
 
-## 5. Editing your catalog
+## 5. Connect shaashbeautystore.com
+
+The site defaults to `shaashbeautystore.com` in its SEO tags already
+([layout.tsx](src/app/layout.tsx)), so this is just plugging the domain in —
+no further code changes needed.
+
+1. In Vercel: your project → **Settings → Domains** → enter
+   `shaashbeautystore.com` → **Add**. Also add `www.shaashbeautystore.com`
+   if you want both to work (Vercel will offer to redirect one to the
+   other — pick whichever you want as the canonical address).
+2. Vercel shows you the exact DNS record(s) to add — usually an `A` record
+   (for the root domain) and/or a `CNAME` (for `www`).
+3. Go to wherever you bought the domain (registrar) → DNS settings → add
+   those records exactly as Vercel shows them.
+4. Wait for DNS to propagate (usually minutes, can take a few hours) —
+   Vercel's Domains page shows a ✓ once it's verified, and issues an SSL
+   certificate automatically.
+5. Update `NEXT_PUBLIC_SITE_URL` in Vercel's **Environment Variables**
+   (Production) to `https://shaashbeautystore.com`, then redeploy.
+
+I can't do any of this part myself — it needs your Vercel and domain
+registrar logins.
+
+## 6. Editing your catalog
 
 There's no admin panel yet (by design, for this phase) — edit data directly in the Supabase **Table Editor**:
 
@@ -57,7 +80,7 @@ There's no admin panel yet (by design, for this phase) — edit data directly in
 - **hairstyles**, **categories**, **hairstyle_inspiration**, **hairstyle_inspiration_products** — same idea, edit/add rows directly.
 - Changes appear on the live site within 60 seconds (pages use 60s ISR caching), or immediately on next deploy.
 
-## 6. Adding product photos
+## 7. Adding product photos
 
 1. Drop your images into `public/images/products/<product-code>/`, e.g. `public/images/products/211/img-1.jpg`.
 2. Commit and push (or deploy) so the files ship with the site.
@@ -65,7 +88,7 @@ There's no admin panel yet (by design, for this phase) — edit data directly in
 
 The gallery component doesn't assume a fixed number of images — add as many rows per product as you like.
 
-## 7. Why some pages show no products right now
+## 8. Why some pages show no products right now
 
 The catalog queries are written to **fail soft**: if Supabase isn't reachable
 (no project yet, wrong keys, schema not run), pages render with empty
@@ -73,7 +96,7 @@ results instead of crashing. You'll see a `[queries/...] ... is Supabase set
 up?` message in the server logs when that happens — that's expected until
 step 1–2 above are done, not a bug.
 
-## 8. Set up Razorpay (test mode)
+## 9. Set up Razorpay (test mode)
 
 Checkout is wired to Razorpay end-to-end: `/api/checkout` opens a Razorpay
 order (writing nothing to Supabase yet), the browser opens Razorpay's
@@ -121,7 +144,7 @@ Payment" button, reusing the same Razorpay order rather than starting over.
   earlier choice. The `customers` table just captures whoever checks out.
 - **Admin panel**: none yet — use the Supabase Table Editor (see above).
 
-## 9. Get order notifications on Telegram (optional)
+## 10. Get order notifications on Telegram (optional)
 
 Every time a payment is verified, `/api/checkout/verify` sends a message —
 customer name, phone, full address, and the products ordered — to a
@@ -153,16 +176,16 @@ Since this only fires from `/api/checkout/verify`, you'll only ever be
 notified for orders that were actually paid — never for failed or abandoned
 payments.
 
-## 10. Content placeholders to fill in before launch
+## 11. Content placeholders to fill in before launch
 
 Search the repo for `PLACEHOLDER` to find every spot with generic copy that
 should be reviewed/replaced with real brand info:
 
 - [src/components/layout/Footer.tsx](src/components/layout/Footer.tsx) — real support email (the WhatsApp number is already real).
 - [src/components/home/WhyChooseUs.tsx](src/components/home/WhyChooseUs.tsx) and [src/components/home/TrustSection.tsx](src/components/home/TrustSection.tsx) — generic trust copy; confirm against your actual policies.
-- Razorpay checkout copy already says "test mode" in [CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — drop that phrase from both once you've switched to Live Mode keys (step 8 above).
+- Razorpay checkout copy already says "test mode" in [CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — drop that phrase from both once you've switched to Live Mode keys (step 9 above).
 
-## 11. Browsing orders
+## 12. Browsing orders
 
 The raw `orders` table mixes fulfilment fields (name, address, phone) with
 bookkeeping ones (payment ids, timestamps) in no particular order, and
