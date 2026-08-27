@@ -46,6 +46,8 @@ export interface Product {
   low_stock_threshold: number;
   is_hidden: boolean;
   featured: boolean;
+  /** Non-null when this listing shares physical inventory with another product code (see supabase/schema.sql). */
+  stock_group: string | null;
   tags: string[] | null;
   seo_title: string | null;
   seo_description: string | null;

@@ -267,6 +267,19 @@ update product_images set alt_text = replace(alt_text, 'Curly Black', 'Curly Dar
 where product_id = (select id from products where code = '210');
 
 -- ---------------------------------------------------------------------
+-- Shared inventory: these 4 pairs are the same physical stock listed under
+-- two product codes (e.g. 210 and 204 are one bundle in the stockroom, sold
+-- as two catalog entries). Grouping them here means /api/checkout and
+-- /api/checkout/verify keep both codes' stock_quantity in sync automatically
+-- from now on — buying either one decrements both. Only touches
+-- stock_group; never price/stock_quantity/featured/is_hidden. Safe to re-run.
+-- ---------------------------------------------------------------------
+update products set stock_group = 'group-201-205' where code in ('201', '205');
+update products set stock_group = 'group-202-206' where code in ('202', '206');
+update products set stock_group = 'group-203-209' where code in ('203', '209');
+update products set stock_group = 'group-204-210' where code in ('204', '210');
+
+-- ---------------------------------------------------------------------
 -- product_images
 -- Paths match public/images/products/<code>/img-N.jpg. Add more rows here
 -- as you add more photos per product.

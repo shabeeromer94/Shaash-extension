@@ -65,13 +65,30 @@ create table if not exists products (
   tags text[] not null default '{}',
   seo_title text,
   seo_description text,
+
+  -- Some catalog listings are literally the same physical inventory sold
+  -- under two different product codes (e.g. one styled/named for the
+  -- "highlights" line, one for "dark brown" — same bundle in the stockroom).
+  -- Rows sharing a non-null stock_group are kept at the same stock_quantity
+  -- automatically: buying either one decrements every row in the group (see
+  -- /api/checkout and /api/checkout/verify). NULL means "not shared" — the
+  -- normal case. Editing stock_quantity by hand in the Table Editor still
+  -- works, but if you manually restock a grouped product, set the same
+  -- number on every code in its group — see SETUP.md.
+  stock_group text,
+
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
+-- Migration for a database that already has `products` from before
+-- stock_group existed. Safe to re-run.
+alter table products add column if not exists stock_group text;
+
 create index if not exists products_category_id_idx on products (category_id);
 create index if not exists products_texture_idx on products (texture);
 create index if not exists products_featured_idx on products (featured);
+create index if not exists products_stock_group_idx on products (stock_group) where stock_group is not null;
 
 -- ---------------------------------------------------------------------
 -- product_images — supports any number of images per product (0..N).

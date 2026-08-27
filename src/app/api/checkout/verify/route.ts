@@ -81,7 +81,7 @@ export async function POST(request: Request) {
   const codes = data.items.map((item) => item.productCode);
   const { data: products, error: productsError } = await supabase
     .from("products")
-    .select("id, code, name, price_inr, stock_quantity")
+    .select("id, code, name, price_inr, stock_quantity, stock_group")
     .in("code", codes);
 
   if (productsError || !products) {
@@ -199,12 +199,44 @@ export async function POST(request: Request) {
     console.error("[checkout/verify] Could not save order_items for", order.order_number, itemsError);
   }
 
+  // Some product codes share one physical stock pool (see products.stock_group)
+  // — e.g. codes 210 and 204 are the same inventory listed twice. Buying
+  // either must decrement every code in the group together, or the two
+  // listings drift apart from what's actually left in the stockroom.
+  const soldByGroup = new Map<string, number>(); // stock_group -> total qty sold in this order
+  const soldBySingleCode = new Map<string, number>(); // product_code -> qty, for ungrouped products
   for (const item of orderItems) {
     const product = productByCode.get(item.product_code)!;
+    if (product.stock_group) {
+      soldByGroup.set(product.stock_group, (soldByGroup.get(product.stock_group) ?? 0) + item.quantity);
+    } else {
+      soldBySingleCode.set(item.product_code, (soldBySingleCode.get(item.product_code) ?? 0) + item.quantity);
+    }
+  }
+
+  if (soldByGroup.size > 0) {
+    const { data: groupedProducts } = await supabase
+      .from("products")
+      .select("stock_group, stock_quantity")
+      .in("stock_group", Array.from(soldByGroup.keys()));
+
+    for (const [group, qtySold] of soldByGroup) {
+      const members = (groupedProducts ?? []).filter((p) => p.stock_group === group);
+      if (members.length === 0) continue;
+      // Every member of a group is meant to hold the same stock_quantity;
+      // take the minimum in case of manual-edit drift, so we never oversell.
+      const currentShared = Math.min(...members.map((m) => m.stock_quantity));
+      const newShared = Math.max(currentShared - qtySold, 0);
+      await supabase.from("products").update({ stock_quantity: newShared }).eq("stock_group", group);
+    }
+  }
+
+  for (const [productCode, qty] of soldBySingleCode) {
+    const product = productByCode.get(productCode)!;
     await supabase
       .from("products")
-      .update({ stock_quantity: Math.max(product.stock_quantity - item.quantity, 0) })
-      .eq("id", item.product_id);
+      .update({ stock_quantity: Math.max(product.stock_quantity - qty, 0) })
+      .eq("id", product.id);
   }
 
   const fullAddress = [

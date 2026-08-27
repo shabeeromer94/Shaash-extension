@@ -75,6 +75,7 @@ registrar logins.
 There's no admin panel yet (by design, for this phase) — edit data directly in the Supabase **Table Editor**:
 
 - **products** — edit price, stock_quantity, is_hidden, featured, description, etc. directly. Availability badges (In Stock / Low Stock / Out of Stock) are computed automatically from `stock_quantity` / `low_stock_threshold` / `is_hidden` — there's nothing else to keep in sync.
+  - **Shared inventory**: a few codes are the same physical stock listed under two product pages — 201/205, 202/206, 203/209, and 204/210. The site keeps these in sync automatically on every sale (buying either one decrements both). But if you manually restock or correct one of these in the Table Editor, set the **same** `stock_quantity` number on its paired code too, or the two listings will drift apart again until the next sale re-syncs them. (Any product's `stock_group` column being non-null is what marks it as shared, and shows which codes are linked — codes with a blank/null `stock_group` are normal, independent stock.)
 - **product_images** — add a row per image (`product_id`, `image_url`, `alt_text`, `sort_order`, `is_primary`). See "Adding product photos" below for the `image_url` convention.
 - **product_hairstyles** — links a product to the hairstyles it suits (drives the Hairstyle Finder). Add/remove rows to change matches.
 - **hairstyles**, **categories**, **hairstyle_inspiration**, **hairstyle_inspiration_products** — same idea, edit/add rows directly.

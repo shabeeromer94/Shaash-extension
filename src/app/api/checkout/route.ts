@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const codes = data.items.map((item) => item.productCode);
   const { data: products, error: productsError } = await supabase
     .from("products")
-    .select("code, name, price_inr, stock_quantity, is_hidden")
+    .select("code, name, price_inr, stock_quantity, is_hidden, stock_group")
     .in("code", codes);
 
   if (productsError) {
@@ -53,6 +53,12 @@ export async function POST(request: Request) {
   const productByCode = new Map((products ?? []).map((p) => [p.code, p]));
   let subtotal = 0;
 
+  // Some product codes share one physical stock pool (see products.stock_group)
+  // — e.g. codes 210 and 204 are the same inventory listed twice. Track
+  // remaining pool per group as we go, so a cart containing both linked
+  // codes can't request more than the pool actually has between them.
+  const remainingStockByGroup = new Map<string, number>();
+
   for (const item of data.items) {
     const product = productByCode.get(item.productCode);
     if (!product || product.is_hidden) {
@@ -61,12 +67,18 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
-    if (product.stock_quantity < item.quantity) {
+    const groupKey = product.stock_group ?? `single:${product.code}`;
+    if (!remainingStockByGroup.has(groupKey)) {
+      remainingStockByGroup.set(groupKey, product.stock_quantity);
+    }
+    const remaining = remainingStockByGroup.get(groupKey)!;
+    if (remaining < item.quantity) {
       return NextResponse.json(
-        { error: `Only ${product.stock_quantity} left of ${product.name}.` },
+        { error: `Only ${remaining} left of ${product.name}.` },
         { status: 409 }
       );
     }
+    remainingStockByGroup.set(groupKey, remaining - item.quantity);
     subtotal += product.price_inr * item.quantity;
   }
 
