@@ -70,11 +70,11 @@ create table if not exists products (
   -- under two different product codes (e.g. one styled/named for the
   -- "highlights" line, one for "dark brown" — same bundle in the stockroom).
   -- Rows sharing a non-null stock_group are kept at the same stock_quantity
-  -- automatically: buying either one decrements every row in the group (see
-  -- /api/checkout and /api/checkout/verify). NULL means "not shared" — the
-  -- normal case. Editing stock_quantity by hand in the Table Editor still
-  -- works, but if you manually restock a grouped product, set the same
-  -- number on every code in its group — see SETUP.md.
+  -- automatically — buying either one decrements every row in the group (see
+  -- /api/checkout and /api/checkout/verify), and editing stock_quantity by
+  -- hand for any one of them in the Table Editor mirrors to the rest too
+  -- (see sync_stock_group() trigger below). NULL means "not shared" — the
+  -- normal case.
   stock_group text,
 
   created_at timestamptz not null default now(),
@@ -89,6 +89,32 @@ create index if not exists products_category_id_idx on products (category_id);
 create index if not exists products_texture_idx on products (texture);
 create index if not exists products_featured_idx on products (featured);
 create index if not exists products_stock_group_idx on products (stock_group) where stock_group is not null;
+
+-- Mirrors any stock_quantity change on a grouped product to every other code
+-- sharing its stock_group — covers BOTH the app's checkout writes AND manual
+-- edits made directly in the Supabase Table Editor, so the two (or more)
+-- linked listings can never show different numbers. The "is distinct from"
+-- guards are what make this safe to cascade: a sibling update that already
+-- matches the target value doesn't re-fire, so a 2-row group settles in one
+-- hop instead of ping-ponging forever.
+create or replace function sync_stock_group() returns trigger as $$
+begin
+  if new.stock_group is not null and new.stock_quantity is distinct from old.stock_quantity then
+    update products
+    set stock_quantity = new.stock_quantity
+    where stock_group = new.stock_group
+      and id <> new.id
+      and stock_quantity is distinct from new.stock_quantity;
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_sync_stock_group on products;
+create trigger trg_sync_stock_group
+  after update of stock_quantity on products
+  for each row
+  execute function sync_stock_group();
 
 -- ---------------------------------------------------------------------
 -- product_images — supports any number of images per product (0..N).
