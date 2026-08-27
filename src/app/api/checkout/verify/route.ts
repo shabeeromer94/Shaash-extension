@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { razorpayVerifySchema } from "@/lib/validation/checkout";
 import { verifyRazorpaySignature } from "@/lib/payments/razorpay";
@@ -217,18 +217,26 @@ export async function POST(request: Request) {
     .filter(Boolean)
     .join(", ");
 
-  // Best-effort — never blocks the customer's confirmation on Telegram being reachable.
-  void sendTelegramOrderNotification(
-    buildTelegramMessage({
-      orderNumber: order.order_number,
-      customerName: data.name,
-      phone: data.phone,
-      fullAddress,
-      deliveryMethod: data.deliveryMethod,
-      items: orderItems,
-      total: order.total,
-      notes: data.notes,
-    })
+  // Best-effort — never blocks the customer's confirmation on Telegram being
+  // reachable. Scheduled via after() rather than a bare `void` call: on
+  // serverless platforms (Vercel), the function can be frozen/torn down the
+  // instant the response below is sent, killing any still-in-flight fetch
+  // that wasn't explicitly kept alive. after() (backed by Vercel's
+  // waitUntil) keeps this invocation alive just long enough for the
+  // Telegram request to finish, without delaying the response itself.
+  after(() =>
+    sendTelegramOrderNotification(
+      buildTelegramMessage({
+        orderNumber: order.order_number,
+        customerName: data.name,
+        phone: data.phone,
+        fullAddress,
+        deliveryMethod: data.deliveryMethod,
+        items: orderItems,
+        total: order.total,
+        notes: data.notes,
+      })
+    )
   );
 
   return NextResponse.json({ orderNumber: order.order_number, total: order.total, status: order.status });
