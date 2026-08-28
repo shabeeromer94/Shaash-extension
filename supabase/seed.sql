@@ -632,32 +632,38 @@ on conflict (product_id, hairstyle_id) do nothing;
 -- ---------------------------------------------------------------------
 -- hairstyle_inspiration — Bridal / Hairstyle Inspiration content
 -- ---------------------------------------------------------------------
+-- Titles/descriptions/slugs below are written to match the real Instagram
+-- Reel linked via instagram_reel_url on each row (set directly in Supabase,
+-- see instagram_reel_url migration above) -- not generic placeholder copy.
+-- image_url is still a Hair Extensions product photo as a fallback for the
+-- /inspiration grid card thumbnail (the Reel itself only plays on the
+-- detail page) -- swap for a real cover photo from each Reel when you have one.
 insert into hairstyle_inspiration (slug, title, short_description, body, image_url, sort_order) values
-  ('soft-curls-everyday-look', 'Soft Curls for an Everyday Glow',
-   'Effortless, romantic waves you can wear any day of the week.',
-   'Soft curls are the easiest way to add texture and movement without looking overdone. Clip in a wavy extension, run a curling wand through the ends for blend, and you''re ready — perfect for work, brunch, or a casual date.',
+  ('messy-braid-pink-roses', 'Messy Braid with Fresh Pink Roses',
+   'Soft, romantic, and effortlessly timeless — a dreamy messy braid finished with delicate pink roses.',
+   'A soft, romantic messy braid woven through with fresh pink roses — designed to complement the bride, never overpower her. Every detail, from the loose textured braid to the placement of each flower, is built for a look that feels dreamy and effortlessly timeless.',
    '/images/products/Hair Extensions/201/img-1.jpg', 0),
 
-  ('curly-bridal-hairstyle', 'Bridal Hairstyle: Voluminous Curls',
-   'Full, elegant volume built to hold through your whole wedding day.',
-   'For a bridal look that photographs beautifully and lasts from ceremony to reception, voluminous curly extensions add the fullness fine hair often needs. Pair with soft face-framing pieces for a timeless, romantic finish.',
+  ('three-braid-south-indian-bridal', 'Three-Braid South Indian Bridal Style',
+   'Tradition meets modern — three individual braids woven into one rich, graceful bridal look.',
+   'A braid style that holds the beauty of tradition, yet feels effortlessly modern. Three individual braids are brought together into one, creating a look that''s rich in detail and graceful from every angle — a timeless choice rooted in South Indian bridal tradition.',
    '/images/products/Hair Extensions/205/img-1.jpg', 1),
 
-  ('long-ponytail-instant-length', 'The High Ponytail, Instantly Longer',
-   'Add length and thickness to your go-to high pony in minutes.',
-   'A high ponytail is a five-minute hairstyle — until you want it longer and fuller than your natural hair allows. Clip a wavy or curly extension underneath your own ponytail for instant length with no visible tracks.',
+  ('soft-curls-textured-braid-accessories', 'Soft Curls, Textured Braid & Delicate Accessories',
+   'The bridal hairstyle you''ll keep coming back to — soft curls, a textured braid, and the tiniest accessories that make the biggest difference.',
+   'Sometimes it''s the little details that transform a hairstyle into something unforgettable. This look pairs soft curls with a textured braid and the tiniest hair accessories — proof that the smallest touches make the biggest difference on your wedding day.',
    '/images/products/Hair Extensions/210/img-1.jpg', 2)
 on conflict (slug) do nothing;
 
 insert into hairstyle_inspiration_products (inspiration_id, product_id, sort_order)
 select i.id, p.id, v.sort_order
 from (values
-  ('soft-curls-everyday-look', '201', 0),
-  ('soft-curls-everyday-look', '203', 1),
-  ('curly-bridal-hairstyle', '205', 0),
-  ('curly-bridal-hairstyle', '206', 1),
-  ('long-ponytail-instant-length', '210', 0),
-  ('long-ponytail-instant-length', '202', 1)
+  ('messy-braid-pink-roses', '201', 0),
+  ('messy-braid-pink-roses', '203', 1),
+  ('three-braid-south-indian-bridal', '205', 0),
+  ('three-braid-south-indian-bridal', '206', 1),
+  ('soft-curls-textured-braid-accessories', '210', 0),
+  ('soft-curls-textured-braid-accessories', '202', 1)
 ) as v(inspiration_slug, code, sort_order)
 join hairstyle_inspiration i on i.slug = v.inspiration_slug
 join products p on p.code = v.code
