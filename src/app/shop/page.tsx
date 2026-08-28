@@ -119,13 +119,15 @@ export default async function ShopPage({
         <CategoryQuickLinks categories={categories} activeSlug={activeCategorySlug} />
         <HairstyleQuickLinks hairstyles={hairstyles} activeSlug={filters.hairstyle} />
         <div className="grid gap-10 lg:grid-cols-[260px_1fr]">
-          <ShopFilters
-            options={filterOptions}
-            hairstyles={hairstyles}
-            categories={categories}
-            activeFilters={filters}
-            activeCategorySlug={activeCategorySlug}
-          />
+          <div className="hidden lg:block">
+            <ShopFilters
+              options={filterOptions}
+              hairstyles={hairstyles}
+              categories={categories}
+              activeFilters={filters}
+              activeCategorySlug={activeCategorySlug}
+            />
+          </div>
           {showGroupTiles ? (
             <AccessoryGroupGrid products={displayProducts} categorySlug={activeCategorySlug} />
           ) : (
