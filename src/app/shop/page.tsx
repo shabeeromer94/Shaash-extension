@@ -46,9 +46,17 @@ export default async function ShopPage({
   const params = await searchParams;
 
   const rawCategory = firstValue(params.category);
+  const hasHairstyleFilter = !!firstValue(params.hairstyle);
   // "all" is an explicit request to clear the default; undefined means the
-  // param was never in the URL, which is where the default kicks in.
-  const activeCategorySlug = rawCategory === "all" ? "all" : rawCategory ?? DEFAULT_CATEGORY_SLUG;
+  // param was never in the URL, which is where the default kicks in — but
+  // only for a bare /shop. A hairstyle filter (e.g. from a "Shop by
+  // Hairstyle" tile) already narrows the results on its own, and products
+  // like Kunjalam/Thread are deliberately tagged for hairstyles outside
+  // Hair Extensions — defaulting to hair-extensions on top of that would
+  // silently hide them, so an explicit-category-less hairstyle browse
+  // defaults to "all" instead.
+  const activeCategorySlug =
+    rawCategory === "all" ? "all" : rawCategory ?? (hasHairstyleFilter ? "all" : DEFAULT_CATEGORY_SLUG);
   const categoryDbFilter = activeCategorySlug === "all" ? undefined : activeCategorySlug;
 
   const filters: ProductFilters = {

@@ -603,27 +603,24 @@ insert into product_hairstyles (product_id, hairstyle_id)
 select p.id, h.id
 from (values
   ('204', 'soft-curls'), ('202', 'soft-curls'), ('203', 'soft-curls'), ('201', 'soft-curls'),
-  ('206', 'braided'), ('205', 'braided'),
-  ('210', 'half-up-half-down'), ('209', 'half-up-half-down'),
+  ('206', 'braided'), ('205', 'braided'), ('210', 'braided'), ('209', 'braided'),
+  ('226', 'braided'), ('225', 'braided'),
+  ('201', 'half-up-half-down'), ('202', 'half-up-half-down'), ('203', 'half-up-half-down'),
+  ('204', 'half-up-half-down'), ('205', 'half-up-half-down'), ('206', 'half-up-half-down'),
   ('210', 'heart-braids'), ('204', 'heart-braids'), ('209', 'heart-braids'), ('203', 'heart-braids'),
+  ('201', 'heart-braids'), ('202', 'heart-braids'), ('205', 'heart-braids'), ('206', 'heart-braids'),
+  ('227', 'heart-braids'), ('228', 'heart-braids'), ('225', 'heart-braids'), ('226', 'heart-braids'),
   ('210', 'voluminous-curls'), ('209', 'voluminous-curls'),
-  ('206', 'messy-braids'), ('205', 'messy-braids'),
+  ('206', 'messy-braids'), ('205', 'messy-braids'), ('210', 'messy-braids'), ('209', 'messy-braids'),
 
-  ('222', 'half-up-half-down'), ('222', 'heart-braids'),
-  ('223', 'voluminous-curls'), ('223', 'messy-braids'), ('223', 'braided'),
-  ('224', 'voluminous-curls'), ('224', 'braided'), ('224', 'messy-braids'),
-  ('225', 'soft-curls'), ('225', 'half-up-half-down'),
-  ('226', 'soft-curls'), ('226', 'half-up-half-down'), ('226', 'heart-braids'),
-  ('227', 'half-up-half-down'), ('227', 'voluminous-curls'), ('227', 'heart-braids'),
-  ('228', 'soft-curls'), ('228', 'heart-braids'),
-  ('229', 'voluminous-curls'), ('229', 'heart-braids'), ('229', 'messy-braids'),
-  ('230', 'soft-curls'), ('230', 'half-up-half-down'),
+  ('223', 'voluminous-curls'),
+  ('224', 'voluminous-curls'),
 
-  -- Hair Accessories: thread works with any hairstyle, so it's linked to
-  -- all six; kunjalam (all 5 designs) is specifically a messy-braids piece.
-  ('303', 'soft-curls'), ('303', 'braided'), ('303', 'half-up-half-down'),
+  -- Hair Accessories: thread works with any hairstyle except
+  -- half-up-half-down, braided, and soft-curls (all reserved for specific
+  -- Hair Extensions codes only); kunjalam (all 5 designs) is specifically a
+  -- messy-braids piece.
   ('303', 'heart-braids'), ('303', 'voluminous-curls'), ('303', 'messy-braids'),
-  ('308', 'soft-curls'), ('308', 'braided'), ('308', 'half-up-half-down'),
   ('308', 'heart-braids'), ('308', 'voluminous-curls'), ('308', 'messy-braids'),
   ('302', 'messy-braids'), ('304', 'messy-braids'), ('305', 'messy-braids'),
   ('306', 'messy-braids'), ('307', 'messy-braids')
