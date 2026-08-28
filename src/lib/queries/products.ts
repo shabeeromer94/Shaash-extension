@@ -12,6 +12,14 @@ const PRODUCT_SELECT = `
   hairstyle_links:product_hairstyles(hairstyle:hairstyles(*))
 `;
 
+/** Whether there's actually something to sell — checks each variant's own stock for a variant product, since the product row's own stock_quantity is just a display fallback then. */
+function isProductInStock(product: Product): boolean {
+  if (product.variants && product.variants.length > 0) {
+    return product.variants.some((v) => v.stock_quantity > 0);
+  }
+  return product.stock_quantity > 0;
+}
+
 const EMPTY_FILTER_OPTIONS: FilterOptions = {
   textures: [],
   colours: [],
@@ -84,6 +92,16 @@ export async function getAllProducts(filters: ProductFilters = {}): Promise<Prod
     if (filters.hairstyle) {
       products = products.filter((p) => p.hairstyles?.some((h) => h.slug === filters.hairstyle));
     }
+
+    // In-stock products always float above out-of-stock ones, on every
+    // category and every sort mode — nobody wants to see something they
+    // can't buy at the top of the list. A stable sort on just this one
+    // boolean preserves whatever order (featured/price/newest) the query
+    // above already established within each group.
+    products = products
+      .map((p, index) => ({ p, index, inStock: isProductInStock(p) }))
+      .sort((a, b) => (a.inStock === b.inStock ? a.index - b.index : a.inStock ? -1 : 1))
+      .map(({ p }) => p);
 
     return products;
   } catch (error) {
