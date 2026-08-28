@@ -35,7 +35,7 @@ export function InstagramEmbed({ url }: { url: string }) {
       />
       <Script
         src="https://www.instagram.com/embed.js"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         onLoad={() => window.instgrm?.Embeds?.process()}
       />
     </div>
