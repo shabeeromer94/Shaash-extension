@@ -1,14 +1,10 @@
-import {
-  getAllProducts,
-  getFeaturedProducts,
-  getFilterOptions,
-  getProductByCode,
-} from "@/lib/queries/products";
+import { getAllProducts, getFeaturedProducts, getProductByCode } from "@/lib/queries/products";
 import { getAllHairstyles } from "@/lib/queries/hairstyles";
+import { getAllCategories } from "@/lib/queries/categories";
 import { Hero } from "@/components/home/Hero";
 import { ProductShowcase } from "@/components/home/ProductShowcase";
 import { ShopByHairstyle } from "@/components/home/ShopByHairstyle";
-import { ShopByTexture } from "@/components/home/ShopByTexture";
+import { ShopByCategory } from "@/components/home/ShopByCategory";
 import { WhyChooseUs } from "@/components/home/WhyChooseUs";
 import { TrustSection } from "@/components/home/TrustSection";
 import { FinalCTA } from "@/components/home/FinalCTA";
@@ -16,11 +12,11 @@ import { FinalCTA } from "@/components/home/FinalCTA";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featured, allProducts, hairstyles, filterOptions, heroProduct] = await Promise.all([
+  const [featured, allProducts, hairstyles, categories, heroProduct] = await Promise.all([
     getFeaturedProducts(8),
     getAllProducts(),
     getAllHairstyles(),
-    getFilterOptions(),
+    getAllCategories(),
     getProductByCode("204"),
   ]);
 
@@ -32,17 +28,19 @@ export default async function HomePage() {
       : undefined;
 
   const featuredForGrid = featured.slice(0, 4);
-  const recommended = allProducts.filter((p) => !p.featured).slice(0, 4);
 
-  const textureGroups = filterOptions.textures.map((texture) => {
-    const match = allProducts.find((p) => p.texture === texture);
+  // allProducts is already featured-first and in-stock-first (see
+  // getAllProducts) — the first match per category is a reasonable cover photo.
+  const categoryTiles = categories.map((category) => {
+    const match = allProducts.find((p) => p.category_id === category.id);
     const image = match?.images?.find((img) => img.is_primary) ?? match?.images?.[0];
-    return { label: texture, image: image?.image_url };
+    return { slug: category.slug, name: category.name, image: image?.image_url };
   });
 
   return (
     <>
       <Hero image={heroImage} />
+      <WhyChooseUs />
       <ShopByHairstyle hairstyles={hairstyles} />
       <ProductShowcase
         eyebrow="Best Sellers"
@@ -52,17 +50,7 @@ export default async function HomePage() {
         ctaHref="/shop"
         ctaLabel="View All Products"
       />
-      <ShopByTexture textures={textureGroups} />
-      <WhyChooseUs />
-      <ProductShowcase
-        eyebrow="Recommended"
-        title="More to Explore"
-        description="A few more styles worth a look, picked from across the collection."
-        products={recommended}
-        tone="cream"
-        ctaHref="/shop"
-        ctaLabel="Browse Full Shop"
-      />
+      <ShopByCategory categories={categoryTiles} />
       <TrustSection />
       <FinalCTA />
     </>
