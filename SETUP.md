@@ -80,6 +80,7 @@ There's no admin panel yet (by design, for this phase) — edit data directly in
 - **product_variants** — size/price options for a single product page (e.g. the Sponge Hair Donut's Small/Medium/Big). Add a row per size (`product_id`, `label`, `price_inr`, `stock_quantity`, `sort_order`) and the product page automatically shows a size picker instead of a single price — customers pick one before adding to cart, and stock/price are tracked per size from then on (checkout, order emails, and the order_summary view all show which size was bought). A product with zero rows here is just sold at its own price/stock as normal — nothing else to configure.
 - **product_hairstyles** — links a product to the hairstyles it suits (drives the Hairstyle Finder). Add/remove rows to change matches.
 - **hairstyles**, **categories**, **hairstyle_inspiration**, **hairstyle_inspiration_products** — same idea, edit/add rows directly.
+  - **Instagram Reels on /inspiration**: set `instagram_reel_url` on a `hairstyle_inspiration` row to the full Reel/post URL (copy it from the "Copy Link" option on the Reel itself, e.g. `https://www.instagram.com/reel/XXXXXXXXXXX/`) and that entry's detail page embeds the actual Reel inline — visitors watch it right there instead of leaving your site. Leave it blank and the entry just shows its own `image_url` photo as before, so this is entirely optional per entry.
 - Changes appear on the live site within 60 seconds (pages use 60s ISR caching), or immediately on next deploy.
 
 ## 7. Adding product photos

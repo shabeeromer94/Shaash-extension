@@ -80,6 +80,8 @@ export interface InspirationItem {
   short_description: string | null;
   body: string | null;
   image_url: string | null;
+  /** Full Instagram Reel/post URL — when set, the detail page embeds it inline instead of just showing image_url. */
+  instagram_reel_url: string | null;
   sort_order: number;
   published: boolean;
   products?: Product[];

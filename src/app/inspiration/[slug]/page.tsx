@@ -5,6 +5,7 @@ import { getAllInspiration, getInspirationBySlug } from "@/lib/queries/inspirati
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ProductGrid } from "@/components/product/ProductGrid";
+import { InstagramEmbed } from "@/components/inspiration/InstagramEmbed";
 
 export const revalidate = 60;
 
@@ -41,17 +42,23 @@ export default async function InspirationDetailPage({
   return (
     <div className="py-10 sm:py-14">
       <Container className="max-w-3xl">
-        {item.image_url && (
-          <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-3xl bg-beige/40">
-            <Image
-              src={item.image_url}
-              alt={item.title}
-              fill
-              sizes="(min-width: 1024px) 700px, 100vw"
-              className="object-cover"
-              priority
-            />
+        {item.instagram_reel_url ? (
+          <div className="mb-8">
+            <InstagramEmbed url={item.instagram_reel_url} />
           </div>
+        ) : (
+          item.image_url && (
+            <div className="relative mb-8 aspect-[16/9] overflow-hidden rounded-3xl bg-beige/40">
+              <Image
+                src={item.image_url}
+                alt={item.title}
+                fill
+                sizes="(min-width: 1024px) 700px, 100vw"
+                className="object-cover"
+                priority
+              />
+            </div>
+          )
         )}
         <p className="text-xs font-semibold uppercase tracking-label text-gold">Hairstyle Inspiration</p>
         <h1 className="mt-2 font-display text-3xl text-charcoal sm:text-4xl">{item.title}</h1>

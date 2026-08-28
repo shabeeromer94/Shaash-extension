@@ -185,10 +185,18 @@ create table if not exists hairstyle_inspiration (
   short_description text,
   body text,
   image_url text,
+  -- Full Instagram Reel/post URL (e.g. https://www.instagram.com/reel/XXXXXXXXXXX/).
+  -- When set, the detail page embeds the actual Reel inline (via Instagram's
+  -- own embed widget) instead of just showing image_url as a static photo.
+  instagram_reel_url text,
   sort_order int not null default 0,
   published boolean not null default true,
   created_at timestamptz not null default now()
 );
+
+-- Migration for a database that already has `hairstyle_inspiration` from
+-- before instagram_reel_url existed. Safe to re-run.
+alter table hairstyle_inspiration add column if not exists instagram_reel_url text;
 
 create table if not exists hairstyle_inspiration_products (
   inspiration_id uuid not null references hairstyle_inspiration (id) on delete cascade,
