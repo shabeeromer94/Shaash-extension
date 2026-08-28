@@ -360,7 +360,8 @@ join (values
   ('302', '/images/products/Hair Accessories/Kunjalam/img-4.PNG', 'Kunjalam Braid Tassel — detail view', 3, false),
   ('302', '/images/products/Hair Accessories/Kunjalam/img-5.PNG', 'Kunjalam Braid Tassel — detail view', 4, false),
   ('303', '/images/products/Hair Accessories/Thread/img-1.PNG', 'Hair Braiding Thread — main view', 0, true),
-  ('303', '/images/products/Hair Accessories/Thread/img-2.PNG', 'Hair Braiding Thread — detail view', 1, false)
+  ('303', '/images/products/Hair Accessories/Thread/img-2.PNG', 'Hair Braiding Thread — detail view', 1, false),
+  ('303', '/images/products/Hair Accessories/Thread/img-3.PNG', 'Hair Braiding Thread — detail view', 2, false)
 ) as v(code, image_url, alt_text, sort_order, is_primary) on v.code = p.code
 where not exists (
   select 1 from product_images pi where pi.product_id = p.id and pi.image_url = v.image_url
