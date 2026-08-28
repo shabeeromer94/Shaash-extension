@@ -191,7 +191,35 @@ insert into products (
    (select id from categories where slug = 'hair-extensions'), 10, false,
    array['layered', 'new'],
    '230 Natural Wavy Dark Brown Hair Extension | SHAASH Beauty Store',
-   'Shop the 230 Natural Wavy Dark Brown (Shade #4) layered hair extension — 22 inch wavy texture in a rich dark brown.')
+   'Shop the 230 Natural Wavy Dark Brown (Shade #4) layered hair extension — 22 inch wavy texture in a rich dark brown.'),
+
+  -- New Hair Accessories category products. Price/stock are placeholders
+  -- (0) and is_hidden is true on purpose — the owner is filling in real
+  -- price, size variants, and stock directly in Supabase; flip is_hidden to
+  -- false (and set a real price_inr/stock_quantity) once ready to publish.
+  ('301', 'Hair Donut Bun Maker',
+   'A soft foam ring that shapes a full, rounded bun in seconds — wrap your hair around it and secure for an instantly voluminous, salon-neat finish. Handy for everyday buns or as a base for bridal updos.',
+   0.00, null, null, null, null,
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   '301 Hair Donut Bun Maker | SHAASH Beauty Store',
+   'Shop the Hair Donut Bun Maker — shape a full, voluminous bun in seconds.'),
+
+  ('302', 'Kunjalam Braid Tassel',
+   'A traditional South Indian jada kunjalam — a decorative tassel that attaches to the end of your braid for a classic bridal or festive finish.',
+   0.00, null, null, null, null,
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   '302 Kunjalam Braid Tassel | SHAASH Beauty Store',
+   'Shop the Kunjalam Braid Tassel — a traditional decorative finish for bridal and festive braids.'),
+
+  ('303', 'Hair Braiding Thread',
+   'Decorative braiding thread used to weave a fuller, more elaborate plait — a traditional finishing touch for bridal and festive hairstyles.',
+   0.00, null, null, null, null,
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   '303 Hair Braiding Thread | SHAASH Beauty Store',
+   'Shop the Hair Braiding Thread — a traditional decorative touch for bridal and festive braids.')
 on conflict (code) do nothing;
 
 -- ---------------------------------------------------------------------
@@ -281,47 +309,58 @@ update products set stock_group = 'group-204-210' where code in ('204', '210');
 
 -- ---------------------------------------------------------------------
 -- product_images
--- Paths match public/images/products/<code>/img-N.jpg. Add more rows here
--- as you add more photos per product.
+-- Paths match public/images/products/<Category Folder>/<code-or-name>/img-N.ext
+-- — e.g. Hair Extensions/201/img-1.jpg, Hair Accessories/Kunjalam/img-1.PNG.
+-- Add more rows here as you add more photos per product.
 -- ---------------------------------------------------------------------
 insert into product_images (product_id, image_url, alt_text, sort_order, is_primary)
 select p.id, v.image_url, v.alt_text, v.sort_order, v.is_primary
 from products p
 join (values
-  ('201', '/images/products/201/img-1.jpg', 'Natural Wavy Highlights Hair Extension, Layered — main view', 0, true),
-  ('201', '/images/products/201/img-2.jpg', 'Natural Wavy Highlights Hair Extension, Layered — detail view', 1, false),
-  ('202', '/images/products/202/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — main view', 0, true),
-  ('202', '/images/products/202/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — detail view', 1, false),
-  ('203', '/images/products/203/img-1.jpg', 'Natural Wavy Highlights Hair Extension — main view', 0, true),
-  ('203', '/images/products/203/img-2.jpg', 'Natural Wavy Highlights Hair Extension — detail view', 1, false),
-  ('204', '/images/products/204/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension — main view', 0, true),
-  ('204', '/images/products/204/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension — detail view', 1, false),
-  ('205', '/images/products/205/img-1.jpg', 'Natural Curly Highlights Hair Extension, Layered — main view', 0, true),
-  ('205', '/images/products/205/img-2.jpg', 'Natural Curly Highlights Hair Extension, Layered — detail view', 1, false),
-  ('206', '/images/products/206/img-1.jpg', 'Natural Curly Dark Brown Hair Extension, Layered — main view', 0, true),
-  ('206', '/images/products/206/img-2.jpg', 'Natural Curly Dark Brown Hair Extension, Layered — detail view', 1, false),
-  ('209', '/images/products/209/img-1.jpg', 'Curly Highlights Hair Extension — main view', 0, true),
-  ('209', '/images/products/209/img-2.jpg', 'Curly Highlights Hair Extension — detail view', 1, false),
-  ('210', '/images/products/210/img-1.jpg', 'Curly Dark Brown Hair Extension — main view', 0, true),
-  ('210', '/images/products/210/img-2.jpg', 'Curly Dark Brown Hair Extension — detail view', 1, false),
-  ('222', '/images/products/222/img-1.jpg', 'Natural Straight Dark Brown Hair Extension — main view', 0, true),
-  ('222', '/images/products/222/img-2.jpg', 'Natural Straight Dark Brown Hair Extension — detail view', 1, false),
-  ('223', '/images/products/223/img-1.jpg', 'Natural Curly Highlights Hair Extension, Full Set — main view', 0, true),
-  ('223', '/images/products/223/img-2.jpg', 'Natural Curly Highlights Hair Extension, Full Set — detail view', 1, false),
-  ('224', '/images/products/224/img-1.jpg', 'Natural Curly Dark Brown Hair Extension, Full Set — main view', 0, true),
-  ('224', '/images/products/224/img-2.jpg', 'Natural Curly Dark Brown Hair Extension, Full Set — detail view', 1, false),
-  ('225', '/images/products/225/img-1.jpg', 'Natural Wavy Highlights Hair Extension, Layered — main view', 0, true),
-  ('225', '/images/products/225/img-2.jpg', 'Natural Wavy Highlights Hair Extension, Layered — detail view', 1, false),
-  ('226', '/images/products/226/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — main view', 0, true),
-  ('226', '/images/products/226/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — detail view', 1, false),
-  ('227', '/images/products/227/img-1.jpg', 'Natural Curly Highlights Hair Extension — main view', 0, true),
-  ('227', '/images/products/227/img-2.jpg', 'Natural Curly Highlights Hair Extension — detail view', 1, false),
-  ('228', '/images/products/228/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension — main view', 0, true),
-  ('228', '/images/products/228/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension — detail view', 1, false),
-  ('229', '/images/products/229/img-1.jpg', 'Natural Curly Highlights Hair Extension, Layered — main view', 0, true),
-  ('229', '/images/products/229/img-2.jpg', 'Natural Curly Highlights Hair Extension, Layered — detail view', 1, false),
-  ('230', '/images/products/230/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — main view', 0, true),
-  ('230', '/images/products/230/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — detail view', 1, false)
+  ('201', '/images/products/Hair Extensions/201/img-1.jpg', 'Natural Wavy Highlights Hair Extension, Layered — main view', 0, true),
+  ('201', '/images/products/Hair Extensions/201/img-2.jpg', 'Natural Wavy Highlights Hair Extension, Layered — detail view', 1, false),
+  ('202', '/images/products/Hair Extensions/202/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — main view', 0, true),
+  ('202', '/images/products/Hair Extensions/202/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — detail view', 1, false),
+  ('203', '/images/products/Hair Extensions/203/img-1.jpg', 'Natural Wavy Highlights Hair Extension — main view', 0, true),
+  ('203', '/images/products/Hair Extensions/203/img-2.jpg', 'Natural Wavy Highlights Hair Extension — detail view', 1, false),
+  ('204', '/images/products/Hair Extensions/204/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension — main view', 0, true),
+  ('204', '/images/products/Hair Extensions/204/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension — detail view', 1, false),
+  ('205', '/images/products/Hair Extensions/205/img-1.jpg', 'Natural Curly Highlights Hair Extension, Layered — main view', 0, true),
+  ('205', '/images/products/Hair Extensions/205/img-2.jpg', 'Natural Curly Highlights Hair Extension, Layered — detail view', 1, false),
+  ('206', '/images/products/Hair Extensions/206/img-1.jpg', 'Natural Curly Dark Brown Hair Extension, Layered — main view', 0, true),
+  ('206', '/images/products/Hair Extensions/206/img-2.jpg', 'Natural Curly Dark Brown Hair Extension, Layered — detail view', 1, false),
+  ('209', '/images/products/Hair Extensions/209/img-1.jpg', 'Curly Highlights Hair Extension — main view', 0, true),
+  ('209', '/images/products/Hair Extensions/209/img-2.jpg', 'Curly Highlights Hair Extension — detail view', 1, false),
+  ('210', '/images/products/Hair Extensions/210/img-1.jpg', 'Curly Dark Brown Hair Extension — main view', 0, true),
+  ('210', '/images/products/Hair Extensions/210/img-2.jpg', 'Curly Dark Brown Hair Extension — detail view', 1, false),
+  ('222', '/images/products/Hair Extensions/222/img-1.jpg', 'Natural Straight Dark Brown Hair Extension — main view', 0, true),
+  ('222', '/images/products/Hair Extensions/222/img-2.jpg', 'Natural Straight Dark Brown Hair Extension — detail view', 1, false),
+  ('223', '/images/products/Hair Extensions/223/img-1.jpg', 'Natural Curly Highlights Hair Extension, Full Set — main view', 0, true),
+  ('223', '/images/products/Hair Extensions/223/img-2.jpg', 'Natural Curly Highlights Hair Extension, Full Set — detail view', 1, false),
+  ('224', '/images/products/Hair Extensions/224/img-1.jpg', 'Natural Curly Dark Brown Hair Extension, Full Set — main view', 0, true),
+  ('224', '/images/products/Hair Extensions/224/img-2.jpg', 'Natural Curly Dark Brown Hair Extension, Full Set — detail view', 1, false),
+  ('225', '/images/products/Hair Extensions/225/img-1.jpg', 'Natural Wavy Highlights Hair Extension, Layered — main view', 0, true),
+  ('225', '/images/products/Hair Extensions/225/img-2.jpg', 'Natural Wavy Highlights Hair Extension, Layered — detail view', 1, false),
+  ('226', '/images/products/Hair Extensions/226/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — main view', 0, true),
+  ('226', '/images/products/Hair Extensions/226/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — detail view', 1, false),
+  ('227', '/images/products/Hair Extensions/227/img-1.jpg', 'Natural Curly Highlights Hair Extension — main view', 0, true),
+  ('227', '/images/products/Hair Extensions/227/img-2.jpg', 'Natural Curly Highlights Hair Extension — detail view', 1, false),
+  ('228', '/images/products/Hair Extensions/228/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension — main view', 0, true),
+  ('228', '/images/products/Hair Extensions/228/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension — detail view', 1, false),
+  ('229', '/images/products/Hair Extensions/229/img-1.jpg', 'Natural Curly Highlights Hair Extension, Layered — main view', 0, true),
+  ('229', '/images/products/Hair Extensions/229/img-2.jpg', 'Natural Curly Highlights Hair Extension, Layered — detail view', 1, false),
+  ('230', '/images/products/Hair Extensions/230/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — main view', 0, true),
+  ('230', '/images/products/Hair Extensions/230/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — detail view', 1, false),
+  ('301', '/images/products/Hair Accessories/Hair Donut/img-1.PNG', 'Hair Donut Bun Maker — main view', 0, true),
+  ('301', '/images/products/Hair Accessories/Hair Donut/img-2.PNG', 'Hair Donut Bun Maker — size variant', 1, false),
+  ('301', '/images/products/Hair Accessories/Hair Donut/img-2.1.PNG', 'Hair Donut Bun Maker — size variant', 2, false),
+  ('302', '/images/products/Hair Accessories/Kunjalam/img-1.PNG', 'Kunjalam Braid Tassel — main view', 0, true),
+  ('302', '/images/products/Hair Accessories/Kunjalam/img-2.PNG', 'Kunjalam Braid Tassel — detail view', 1, false),
+  ('302', '/images/products/Hair Accessories/Kunjalam/img-3.PNG', 'Kunjalam Braid Tassel — detail view', 2, false),
+  ('302', '/images/products/Hair Accessories/Kunjalam/img-4.PNG', 'Kunjalam Braid Tassel — detail view', 3, false),
+  ('302', '/images/products/Hair Accessories/Kunjalam/img-5.PNG', 'Kunjalam Braid Tassel — detail view', 4, false),
+  ('303', '/images/products/Hair Accessories/Thread/img-1.PNG', 'Hair Braiding Thread — main view', 0, true),
+  ('303', '/images/products/Hair Accessories/Thread/img-2.PNG', 'Hair Braiding Thread — detail view', 1, false)
 ) as v(code, image_url, alt_text, sort_order, is_primary) on v.code = p.code
 where not exists (
   select 1 from product_images pi where pi.product_id = p.id and pi.image_url = v.image_url
@@ -367,17 +406,17 @@ insert into hairstyle_inspiration (slug, title, short_description, body, image_u
   ('soft-curls-everyday-look', 'Soft Curls for an Everyday Glow',
    'Effortless, romantic waves you can wear any day of the week.',
    'Soft curls are the easiest way to add texture and movement without looking overdone. Clip in a wavy extension, run a curling wand through the ends for blend, and you''re ready — perfect for work, brunch, or a casual date.',
-   '/images/products/201/img-1.jpg', 0),
+   '/images/products/Hair Extensions/201/img-1.jpg', 0),
 
   ('curly-bridal-hairstyle', 'Bridal Hairstyle: Voluminous Curls',
    'Full, elegant volume built to hold through your whole wedding day.',
    'For a bridal look that photographs beautifully and lasts from ceremony to reception, voluminous curly extensions add the fullness fine hair often needs. Pair with soft face-framing pieces for a timeless, romantic finish.',
-   '/images/products/205/img-1.jpg', 1),
+   '/images/products/Hair Extensions/205/img-1.jpg', 1),
 
   ('long-ponytail-instant-length', 'The High Ponytail, Instantly Longer',
    'Add length and thickness to your go-to high pony in minutes.',
    'A high ponytail is a five-minute hairstyle — until you want it longer and fuller than your natural hair allows. Clip a wavy or curly extension underneath your own ponytail for instant length with no visible tracks.',
-   '/images/products/210/img-1.jpg', 2)
+   '/images/products/Hair Extensions/210/img-1.jpg', 2)
 on conflict (slug) do nothing;
 
 insert into hairstyle_inspiration_products (inspiration_id, product_id, sort_order)

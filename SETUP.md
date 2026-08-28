@@ -83,11 +83,13 @@ There's no admin panel yet (by design, for this phase) — edit data directly in
 
 ## 7. Adding product photos
 
-1. Drop your images into `public/images/products/<product-code>/`, e.g. `public/images/products/211/img-1.jpg`.
+1. Drop your images into `public/images/products/<Category Folder>/<product-code-or-name>/`, matching the existing layout — e.g. `public/images/products/Hair Extensions/211/img-1.jpg` or `public/images/products/Hair Accessories/Kunjalam/img-1.PNG`.
 2. Commit and push (or deploy) so the files ship with the site.
-3. Add a matching row in the `product_images` table with `image_url` set to `/images/products/211/img-1.jpg` (leading slash, no `public` in the path).
+3. Add a matching row in the `product_images` table with `image_url` set to the same path with a leading slash and no `public` — e.g. `/images/products/Hair Extensions/211/img-1.jpg`.
 
 The gallery component doesn't assume a fixed number of images — add as many rows per product as you like.
+
+**Important — spelling and capitalization must match exactly.** Your computer treats `Hair Accessories` and `hair accessories` as the same folder, but the live site (Vercel, running on Linux) does not — a mismatch between the folder name on disk and the `image_url` you type into Supabase will 404 in production even though it looks fine locally. Stick to whatever exact casing you've already used for a category/product folder once you've picked it.
 
 ## 8. Why some pages show no products right now
 
