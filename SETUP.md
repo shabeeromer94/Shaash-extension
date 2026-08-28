@@ -187,7 +187,7 @@ Search the repo for `PLACEHOLDER` to find every spot with generic copy that
 should be reviewed/replaced with real brand info:
 
 - [src/components/layout/Footer.tsx](src/components/layout/Footer.tsx) — real support email (the WhatsApp number is already real).
-- [src/components/home/WhyChooseUs.tsx](src/components/home/WhyChooseUs.tsx) and [src/components/home/TrustSection.tsx](src/components/home/TrustSection.tsx) — generic trust copy; confirm against your actual policies.
+- [src/components/home/TrustSection.tsx](src/components/home/TrustSection.tsx) — generic trust copy; confirm against your actual policies. (WhyChooseUs.tsx now has your real copy — nothing to review there.)
 - Razorpay checkout copy already says "test mode" in [CheckoutForm.tsx](src/components/checkout/CheckoutForm.tsx) and [OrderConfirmationContent.tsx](src/components/checkout/OrderConfirmationContent.tsx) — drop that phrase from both once you've switched to Live Mode keys (step 9 above).
 
 ## 12. Browsing orders
