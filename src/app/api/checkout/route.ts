@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const codes = data.items.map((item) => item.productCode);
   const { data: products, error: productsError } = await supabase
     .from("products")
-    .select("code, name, price_inr, stock_quantity, is_hidden, stock_group")
+    .select("id, code, name, price_inr, stock_quantity, is_hidden, stock_group")
     .in("code", codes);
 
   if (productsError) {
@@ -51,12 +51,25 @@ export async function POST(request: Request) {
   }
 
   const productByCode = new Map((products ?? []).map((p) => [p.code, p]));
+
+  // Products sold with size/price options (see products.variants) are
+  // priced and stocked per-variant, never off the product row itself.
+  const productIds = (products ?? []).map((p) => p.id);
+  const { data: variants, error: variantsError } = productIds.length
+    ? await supabase.from("product_variants").select("id, product_id, label, price_inr, stock_quantity").in("product_id", productIds)
+    : { data: [], error: null };
+  if (variantsError) {
+    return NextResponse.json({ error: "Could not verify products. Please try again." }, { status: 500 });
+  }
+  const variantById = new Map((variants ?? []).map((v) => [v.id, v]));
+
   let subtotal = 0;
 
   // Some product codes share one physical stock pool (see products.stock_group)
   // — e.g. codes 210 and 204 are the same inventory listed twice. Track
   // remaining pool per group as we go, so a cart containing both linked
   // codes can't request more than the pool actually has between them.
+  // Each variant gets its own independent pool, keyed by variant id.
   const remainingStockByGroup = new Map<string, number>();
 
   for (const item of data.items) {
@@ -67,19 +80,35 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
-    const groupKey = product.stock_group ?? `single:${product.code}`;
+
+    let name = product.name;
+    let unitPrice = product.price_inr;
+    let groupKey = product.stock_group ?? `single:${product.code}`;
+    let startingStock = product.stock_quantity;
+
+    if (item.variantId) {
+      const variant = variantById.get(item.variantId);
+      if (!variant || variant.product_id !== product.id) {
+        return NextResponse.json(
+          { error: `${item.productCode} option is no longer available.` },
+          { status: 409 }
+        );
+      }
+      name = `${product.name} — ${variant.label}`;
+      unitPrice = variant.price_inr;
+      groupKey = `variant:${variant.id}`;
+      startingStock = variant.stock_quantity;
+    }
+
     if (!remainingStockByGroup.has(groupKey)) {
-      remainingStockByGroup.set(groupKey, product.stock_quantity);
+      remainingStockByGroup.set(groupKey, startingStock);
     }
     const remaining = remainingStockByGroup.get(groupKey)!;
     if (remaining < item.quantity) {
-      return NextResponse.json(
-        { error: `Only ${remaining} left of ${product.name}.` },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: `Only ${remaining} left of ${name}.` }, { status: 409 });
     }
     remainingStockByGroup.set(groupKey, remaining - item.quantity);
-    subtotal += product.price_inr * item.quantity;
+    subtotal += unitPrice * item.quantity;
   }
 
   const totalQuantity = data.items.reduce((sum, item) => sum + item.quantity, 0);

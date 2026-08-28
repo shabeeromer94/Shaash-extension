@@ -5,23 +5,31 @@ import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCart } from "@/lib/cart-context";
-import type { Product } from "@/lib/types";
 
-export function AddToCartButton({ product }: { product: Product }) {
+interface AddToCartButtonProps {
+  productCode: string;
+  name: string;
+  image: string;
+  price: number;
+  maxQuantity: number;
+  /** Present only for products sold with size/price options — see ProductPurchasePanel. */
+  variantId?: string;
+  variantLabel?: string;
+}
+
+/**
+ * Purely the quantity stepper + Add to Cart / Buy Now buttons. Which
+ * product/variant/price this adds to the cart is decided by the caller
+ * (ProductPurchasePanel) — this component doesn't read stock or pricing
+ * itself, so it stays correct whether or not the product has variants.
+ */
+export function AddToCartButton({ productCode, name, image, price, maxQuantity, variantId, variantLabel }: AddToCartButtonProps) {
   const { addItem } = useCart();
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
-  const maxQuantity = Math.max(product.stock_quantity, 1);
 
-  const primaryImage = product.images?.find((img) => img.is_primary) ?? product.images?.[0];
-  const cartItem = {
-    productCode: product.code,
-    name: product.name,
-    price: product.price_inr,
-    image: primaryImage?.image_url ?? "",
-    maxQuantity,
-  };
+  const cartItem = { productCode, name, price, image, maxQuantity, variantId, variantLabel };
 
   const handleAdd = () => {
     addItem(cartItem, quantity);

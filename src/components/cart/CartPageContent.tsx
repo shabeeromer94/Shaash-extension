@@ -24,7 +24,7 @@ export function CartPageContent() {
           <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
             <div>
               {items.map((item) => (
-                <CartLineItem key={item.productCode} item={item} />
+                <CartLineItem key={`${item.productCode}::${item.variantId ?? ""}`} item={item} />
               ))}
             </div>
             <CartSummary />

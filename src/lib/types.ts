@@ -31,6 +31,16 @@ export interface ProductImage {
   is_primary: boolean;
 }
 
+/** A size/price option on a product — e.g. Small/Medium/Big. See supabase/schema.sql. */
+export interface ProductVariant {
+  id: string;
+  product_id: string;
+  label: string;
+  price_inr: number;
+  stock_quantity: number;
+  sort_order: number;
+}
+
 export interface Product {
   id: string;
   code: string;
@@ -48,6 +58,8 @@ export interface Product {
   featured: boolean;
   /** Non-null when this listing shares physical inventory with another product code (see supabase/schema.sql). */
   stock_group: string | null;
+  /** Non-null when this listing is one of several designs/variants grouped under one family tile on /shop (see supabase/schema.sql). */
+  accessory_group: string | null;
   tags: string[] | null;
   seo_title: string | null;
   seo_description: string | null;
@@ -57,6 +69,8 @@ export interface Product {
   images?: ProductImage[];
   hairstyles?: Hairstyle[];
   category?: Category | null;
+  /** Size/price options, sorted by sort_order — absent/empty means this product is sold at its own price_inr as-is. */
+  variants?: ProductVariant[];
 }
 
 export interface InspirationItem {
@@ -72,6 +86,7 @@ export interface InspirationItem {
 }
 
 export interface ProductFilters {
+  category?: string;
   texture?: string;
   colour?: string;
   hairstyle?: string;

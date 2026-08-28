@@ -197,30 +197,147 @@ insert into products (
   -- (0) and is_hidden is true on purpose — the owner is filling in real
   -- price, size variants, and stock directly in Supabase; flip is_hidden to
   -- false (and set a real price_inr/stock_quantity) once ready to publish.
-  ('301', 'Hair Donut Bun Maker',
-   'A soft foam ring that shapes a full, rounded bun in seconds — wrap your hair around it and secure for an instantly voluminous, salon-neat finish. Handy for everyday buns or as a base for bridal updos.',
+  -- Hair Donut comes in 2 materials, each its own product.
+  ('301', 'Synthetic Hair Donut',
+   'A synthetic hair donut ring that shapes a full, rounded bun in seconds — wrap your hair around it and secure for an instantly voluminous, salon-neat finish. Handy for everyday buns or as a base for bridal updos.',
    0.00, null, null, null, null,
    (select id from categories where slug = 'hair-accessories'), 0, false,
    array['accessory'],
-   '301 Hair Donut Bun Maker | SHAASH Beauty Store',
-   'Shop the Hair Donut Bun Maker — shape a full, voluminous bun in seconds.'),
+   '301 Synthetic Hair Donut | SHAASH Beauty Store',
+   'Shop the Synthetic Hair Donut — shape a full, voluminous bun in seconds.'),
 
-  ('302', 'Kunjalam Braid Tassel',
-   'A traditional South Indian jada kunjalam — a decorative tassel that attaches to the end of your braid for a classic bridal or festive finish.',
+  ('310', 'Sponge Hair Donut',
+   'A soft sponge hair donut ring that shapes a full, rounded bun in seconds — wrap your hair around it and secure for an instantly voluminous, salon-neat finish. Handy for everyday buns or as a base for bridal updos.',
    0.00, null, null, null, null,
    (select id from categories where slug = 'hair-accessories'), 0, false,
    array['accessory'],
-   '302 Kunjalam Braid Tassel | SHAASH Beauty Store',
-   'Shop the Kunjalam Braid Tassel — a traditional decorative finish for bridal and festive braids.'),
+   '310 Sponge Hair Donut | SHAASH Beauty Store',
+   'Shop the Sponge Hair Donut — shape a full, voluminous bun in seconds.'),
 
-  ('303', 'Hair Braiding Thread',
-   'Decorative braiding thread used to weave a fuller, more elaborate plait — a traditional finishing touch for bridal and festive hairstyles.',
-   0.00, null, null, null, null,
+  -- Kunjalam comes in 5 distinct designs, each its own product (different
+  -- ornamentation, different price) rather than one product with 5 photos.
+  ('302', 'Kunjalam - Golden Beads',
+   'A traditional South Indian jada kunjalam with a gold-toned cap and pearl-bead trim, finished with a black silk thread tassel. Handcrafted; used at the end of the braid (jadai) for Mugrutham hairstyle.',
+   400.00, null, null, null, null,
    (select id from categories where slug = 'hair-accessories'), 0, false,
    array['accessory'],
-   '303 Hair Braiding Thread | SHAASH Beauty Store',
-   'Shop the Hair Braiding Thread — a traditional decorative touch for bridal and festive braids.')
+   'Kunjalam - Golden Beads | SHAASH Beauty Store',
+   'Shop the Kunjalam - Golden Beads braid tassel — a traditional decorative finish for bridal and festive braids.'),
+
+  ('304', 'Kunjalam - Gold Plated',
+   'A traditional South Indian jada kunjalam with a plain gold-toned double-dome cap and black silk thread tassel. Handcrafted; used at the end of the braid (jadai) for Mugrutham hairstyle.',
+   350.00, null, null, null, null,
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   'Kunjalam - Gold Plated | SHAASH Beauty Store',
+   'Shop the Kunjalam - Gold Plated braid tassel — a traditional decorative finish for bridal and festive braids.'),
+
+  ('305', 'Kunjalam - White Stones',
+   'A traditional South Indian jada kunjalam with a gold-toned cap adorned with pearls and stones, finished with a black silk thread tassel. Handcrafted; used at the end of the braid (jadai) for Mugrutham hairstyle.',
+   375.00, null, null, null, null,
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   'Kunjalam - White Stones | SHAASH Beauty Store',
+   'Shop the Kunjalam - White Stones braid tassel — a traditional decorative finish for bridal and festive braids.'),
+
+  ('306', 'Kunjalam - Kemp Stone Big',
+   'A traditional South Indian jada kunjalam with a gold-toned cap set with colourful kundan stones and pearls, finished with a black silk thread tassel. Handcrafted; used at the end of the braid (jadai) for Mugrutham hairstyle.',
+   400.00, null, null, null, null,
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   'Kunjalam - Kemp Stone Big | SHAASH Beauty Store',
+   'Shop the Kunjalam - Kemp Stone Big braid tassel — a traditional decorative finish for bridal and festive braids.'),
+
+  ('307', 'Kunjalam - Kemp Small',
+   'A traditional South Indian jada kunjalam with a kundan stone and pearl-set double-dome cap, finished with a black silk thread tassel. Handcrafted; used at the end of the braid (jadai) for Mugrutham hairstyle.',
+   350.00, null, null, null, null,
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   'Kunjalam - Kemp Small | SHAASH Beauty Store',
+   'Shop the Kunjalam - Kemp Small braid tassel — a traditional decorative finish for bridal and festive braids.'),
+
+  ('303', 'Silk Poly Thread 0/8',
+   'High quality silk poly thread, strong, smooth and ideal for all kinds of hair accessories — widely used for making kunjalam, veni, and other traditional hair adornments. Tangle-free with a neat, long-lasting finish. Net weight approx. 25 gms.',
+   45.00, null, null, null, 'Black',
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   'Silk Poly Thread 0/8 | SHAASH Beauty Store',
+   'Shop the Silk Poly Thread 0/8 — strong, smooth black thread for kunjalam, veni and hair accessory work.'),
+
+  ('308', 'Golden Thread',
+   'Shiny and durable gold maggam thread used for traditional embroidery, handwork and hair accessories — easy to use and knot, ideal for tying, wrapping and decorative handwork. Polyester metallic thread, approx. 5 to 6 metres.',
+   25.00, null, null, null, 'Gold',
+   (select id from categories where slug = 'hair-accessories'), 0, false,
+   array['accessory'],
+   'Golden Thread | SHAASH Beauty Store',
+   'Shop the Golden Thread — shiny metallic thread for traditional hair accessory and embroidery work.')
 on conflict (code) do nothing;
+
+-- Correction: the insert above never listed is_hidden, so these Hair
+-- Accessories placeholders defaulted to visible instead of hidden as
+-- originally intended. The owner wants to preview them on the live category
+-- pages now, so they're explicitly unhidden here instead — price/stock are
+-- still ₹0 placeholders until set for real in Supabase. Safe to re-run.
+update products set is_hidden = false
+where code in ('301', '302', '303', '304', '305', '306', '307', '308', '310');
+
+-- Groups the Hair Accessories listings that are really multiple designs/
+-- materials of one family, so /shop shows one tile per family instead of
+-- one card per product (see accessory_group on the products table).
+update products set accessory_group = 'Kunjalam' where code in ('302', '304', '305', '306', '307');
+update products set accessory_group = 'Thread' where code in ('303', '308');
+
+-- The Hair Accessory Needle (309) was added, then the owner decided not to
+-- sell it — remove it entirely so a fresh seed never recreates it. Safe to
+-- re-run (a no-op once already gone).
+delete from product_images where product_id = (select id from products where code = '309');
+delete from products where code = '309';
+update products set accessory_group = 'Hair Donuts' where code in ('301', '310');
+
+-- Correction: 301, 302, and 303 already existed before this round of
+-- renames/splits (Hair Donut Bun Maker -> Synthetic Hair Donut, generic
+-- Kunjalam -> Pearl Bead design, Hair Braiding Thread -> Silk Poly Thread
+-- 0/8), so `on conflict (code) do nothing` above skipped re-applying their
+-- new name/description — only brand-new codes got the new text. Explicit
+-- updates here bypass that. Safe to re-run.
+update products set
+  name = 'Synthetic Hair Donut',
+  description = 'A synthetic hair donut ring that shapes a full, rounded bun in seconds — wrap your hair around it and secure for an instantly voluminous, salon-neat finish. Handy for everyday buns or as a base for bridal updos.',
+  seo_title = '301 Synthetic Hair Donut | SHAASH Beauty Store',
+  seo_description = 'Shop the Synthetic Hair Donut — shape a full, voluminous bun in seconds.'
+where code = '301';
+
+update products set
+  name = 'Kunjalam - Golden Beads',
+  description = 'A traditional South Indian jada kunjalam with a gold-toned cap and pearl-bead trim, finished with a black silk thread tassel. Handcrafted; used at the end of the braid (jadai) for Mugrutham hairstyle.',
+  price_inr = 400.00,
+  seo_title = 'Kunjalam - Golden Beads | SHAASH Beauty Store',
+  seo_description = 'Shop the Kunjalam - Golden Beads braid tassel — a traditional decorative finish for bridal and festive braids.'
+where code = '302';
+
+update products set
+  name = 'Silk Poly Thread 0/8',
+  description = 'High quality silk poly thread, strong, smooth and ideal for all kinds of hair accessories — widely used for making kunjalam, veni, and other traditional hair adornments. Tangle-free with a neat, long-lasting finish. Net weight approx. 25 gms.',
+  colour = 'Black',
+  price_inr = 45.00,
+  seo_title = 'Silk Poly Thread 0/8 | SHAASH Beauty Store',
+  seo_description = 'Shop the Silk Poly Thread 0/8 — strong, smooth black thread for kunjalam, veni and hair accessory work.'
+where code = '303';
+
+-- Same three codes also carry stale product_images rows from before their
+-- photos were reorganized into per-design folders (e.g. 302 still pointing
+-- at the old shared Kunjalam/img-2..5.PNG paths that no longer exist on
+-- disk) — the INSERT further below only adds new rows, it never removes
+-- old ones, so those need an explicit cleanup. Safe to re-run.
+delete from product_images
+where product_id = (select id from products where code = '301')
+  and image_url <> '/images/products/Hair Accessories/Hair Donut Synthetic/img-1.PNG';
+delete from product_images
+where product_id = (select id from products where code = '302')
+  and image_url <> '/images/products/Hair Accessories/Kunjalam - Pearl Bead/img-1.PNG';
+delete from product_images
+where product_id = (select id from products where code = '303')
+  and image_url <> '/images/products/Hair Accessories/Thread/img-1.PNG';
 
 -- ---------------------------------------------------------------------
 -- Colour-naming correction for the original 201–210 batch, seeded before
@@ -229,59 +346,67 @@ on conflict (code) do nothing;
 -- featured or is_hidden. Safe to re-run (a no-op once already corrected).
 -- ---------------------------------------------------------------------
 update products set
+  name = 'Wavy Layered Soft Curls',
   colour = 'Highlights (Brown Tones)',
   description = 'Add instant length and soft, layered movement with this Natural Wavy Highlights Hair Extension. Finished with warm, brown-toned highlights for natural-looking dimension that blends seamlessly into your own hair.',
-  seo_description = 'Shop the 201 Natural Wavy Highlights layered hair extension — 20 inch wavy texture with warm brown-toned highlights.'
+  seo_title = 'Wavy Layered Soft Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Wavy Layered Soft Curls hair extension — 20 inch wavy texture with warm brown-toned highlights.'
 where code = '201';
 
 update products set
-  name = 'Natural Wavy Dark Brown Hair Extension, Layered',
+  name = 'Wavy Layered Soft Curls',
   colour = 'Dark Brown (Shade #4)',
   description = 'A rich Shade #4 dark brown wavy extension with soft layering for effortless volume — a warm tone that flatters Indian skin tones beautifully. Blends seamlessly for a look that''s instantly longer and fuller, without changing your natural colour.',
-  seo_title = '202 Natural Wavy Dark Brown Hair Extension | SHAASH Beauty Store',
-  seo_description = 'Shop the 202 Natural Wavy Dark Brown (Shade #4) layered hair extension — 20 inch wavy texture in a rich dark brown.'
+  seo_title = 'Wavy Layered Soft Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Wavy Layered Soft Curls hair extension — 20 inch wavy texture in a rich dark brown.'
 where code = '202';
 
 update products set
+  name = 'Wavy Soft Curls',
   colour = 'Highlights (Brown Tones)',
   description = 'Soft waves finished with warm, brown-toned highlights — an easy way to add length and dimension to any look.',
-  seo_description = 'Shop the 203 Natural Wavy Highlights hair extension — 18 inch wavy texture with warm brown-toned highlights.'
+  seo_title = 'Wavy Soft Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Wavy Soft Curls hair extension — 18 inch wavy texture with warm brown-toned highlights.'
 where code = '203';
 
 update products set
-  name = 'Natural Wavy Dark Brown Hair Extension',
+  name = 'Wavy Soft Curls',
   colour = 'Dark Brown (Shade #4)',
   description = 'A classic Shade #4 dark brown wavy extension for everyday length and volume — a warm tone that flatters Indian skin tones beautifully. Style straight from the pack or curl to match your look.',
-  seo_title = '204 Natural Wavy Dark Brown Hair Extension | SHAASH Beauty Store',
-  seo_description = 'Shop the 204 Natural Wavy Dark Brown (Shade #4) hair extension — 18 inch wavy texture in a rich dark brown.'
+  seo_title = 'Wavy Soft Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Wavy Soft Curls hair extension — 18 inch wavy texture in a rich dark brown.'
 where code = '204';
 
 update products set
+  name = 'Layered Curls',
   colour = 'Highlights (Brown Tones)',
   description = 'Bold, bouncy curls finished with warm, brown-toned highlights and gentle layering for shape. Built for volume that holds — beautiful for everyday wear or dressed up for an occasion.',
-  seo_description = 'Shop the 205 Natural Curly Highlights layered hair extension — 22 inch voluminous curls with warm brown-toned highlights.'
+  seo_title = 'Layered Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Layered Curls hair extension — 22 inch voluminous curls with warm brown-toned highlights.'
 where code = '205';
 
 update products set
-  name = 'Natural Curly Dark Brown Hair Extension, Layered',
+  name = 'Layered Curls',
   colour = 'Dark Brown (Shade #4)',
   description = 'Rich Shade #4 dark brown curls with soft layering for shape and bounce — a warm tone that flatters Indian skin tones beautifully. A go-to for full, voluminous curls that still feel natural.',
-  seo_title = '206 Natural Curly Dark Brown Hair Extension | SHAASH Beauty Store',
-  seo_description = 'Shop the 206 Natural Curly Dark Brown (Shade #4) layered hair extension — 22 inch voluminous curls in a rich dark brown.'
+  seo_title = 'Layered Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Layered Curls hair extension — 22 inch voluminous curls in a rich dark brown.'
 where code = '206';
 
 update products set
+  name = 'Wedding Open Curls',
   colour = 'Highlights (Brown Tones)',
   description = 'Playful, defined curls finished with warm, brown-toned highlights for extra dimension — an easy way to add volume and length in one step.',
-  seo_description = 'Shop the 209 Curly Highlights hair extension — 16 inch defined curls with warm brown-toned highlights.'
+  seo_title = 'Wedding Open Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Wedding Open Curls hair extension — 16 inch defined curls with warm brown-toned highlights.'
 where code = '209';
 
 update products set
-  name = 'Curly Dark Brown Hair Extension',
+  name = 'Wedding Open Curls',
   colour = 'Dark Brown (Shade #4)',
   description = 'Defined Shade #4 dark brown curls for instant volume and bounce — a warm tone that flatters Indian skin tones beautifully. A versatile everyday extension.',
-  seo_title = '210 Curly Dark Brown Hair Extension | SHAASH Beauty Store',
-  seo_description = 'Shop the 210 Curly Dark Brown (Shade #4) hair extension — 16 inch defined curls in a rich dark brown.'
+  seo_title = 'Wedding Open Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Wedding Open Curls hair extension — 16 inch defined curls in a rich dark brown.'
 where code = '210';
 
 -- Matching fix for photo alt text on the same 4 renamed codes (202/204/206/210).
@@ -295,6 +420,67 @@ update product_images set alt_text = replace(alt_text, 'Curly Black', 'Curly Dar
 where product_id = (select id from products where code = '210');
 
 -- ---------------------------------------------------------------------
+-- Name correction for the 222–230 batch, seeded before these got their
+-- style-based names. Only touches name/colour(222 only)/seo_title/
+-- seo_description — never price, stock_quantity, featured or is_hidden.
+-- Safe to re-run (a no-op once already corrected).
+-- ---------------------------------------------------------------------
+update products set
+  name = 'Straight Patch',
+  colour = 'Shade #2',
+  seo_title = 'Straight Patch | SHAASH Beauty Store',
+  seo_description = 'Shop the Straight Patch hair extension — 23 inch straight texture.'
+where code = '222';
+
+update products set
+  name = 'Curly Patches',
+  seo_title = 'Curly Patches | SHAASH Beauty Store',
+  seo_description = 'Shop the Curly Patches hair extension — 22 inch curly texture with warm brown-toned highlights.'
+where code = '223';
+
+update products set
+  name = 'Curly Patches',
+  seo_title = 'Curly Patches | SHAASH Beauty Store',
+  seo_description = 'Shop the Curly Patches hair extension — 22 inch curly texture in a rich dark brown.'
+where code = '224';
+
+update products set
+  name = 'Long Messy Wavy Curls',
+  seo_title = 'Long Messy Wavy Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Long Messy Wavy Curls hair extension — 24 inch wavy texture with warm brown-toned highlights.'
+where code = '225';
+
+update products set
+  name = 'Long Messy Wavy Curls',
+  seo_title = 'Long Messy Wavy Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Long Messy Wavy Curls hair extension — 24 inch wavy texture in a rich dark brown.'
+where code = '226';
+
+update products set
+  name = 'Short Soft Curls',
+  seo_title = 'Short Soft Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Short Soft Curls hair extension — 22 inch curly texture with warm brown-toned highlights.'
+where code = '227';
+
+update products set
+  name = 'Short Soft Curls',
+  seo_title = 'Short Soft Curls | SHAASH Beauty Store',
+  seo_description = 'Shop the Short Soft Curls hair extension — 20-22 inch wavy texture in a rich dark brown.'
+where code = '228';
+
+update products set
+  name = 'Curls Patch',
+  seo_title = 'Curls Patch | SHAASH Beauty Store',
+  seo_description = 'Shop the Curls Patch hair extension — 22 inch curly texture with warm brown-toned highlights.'
+where code = '229';
+
+update products set
+  name = 'Curls Patch',
+  seo_title = 'Curls Patch | SHAASH Beauty Store',
+  seo_description = 'Shop the Curls Patch hair extension — 22 inch wavy texture in a rich dark brown.'
+where code = '230';
+
+-- ---------------------------------------------------------------------
 -- Shared inventory: these 4 pairs are the same physical stock listed under
 -- two product codes (e.g. 210 and 204 are one bundle in the stockroom, sold
 -- as two catalog entries). Grouping them here means /api/checkout and
@@ -306,6 +492,21 @@ update products set stock_group = 'group-201-205' where code in ('201', '205');
 update products set stock_group = 'group-202-206' where code in ('202', '206');
 update products set stock_group = 'group-203-209' where code in ('203', '209');
 update products set stock_group = 'group-204-210' where code in ('204', '210');
+
+-- Correction: the 22 original Hair Extensions codes (201-210, 222-230) had
+-- their photos moved from public/images/products/<code>/ into
+-- public/images/products/Hair Extensions/<code>/ earlier — but the insert
+-- below only ever adds rows for the new path, it never removes the old flat
+-- path rows from before the move, so every one of these products ended up
+-- with both a working row and a dead one, and the page was randomly
+-- picking whichever sorted first. This removes anything that isn't under
+-- the current Hair Extensions/ folder. Safe to re-run.
+delete from product_images pi
+using products p
+where pi.product_id = p.id
+  and p.code in ('201', '202', '203', '204', '205', '206', '209', '210',
+                 '222', '223', '224', '225', '226', '227', '228', '229', '230')
+  and pi.image_url not like '/images/products/Hair Extensions/%';
 
 -- ---------------------------------------------------------------------
 -- product_images
@@ -351,21 +552,43 @@ join (values
   ('229', '/images/products/Hair Extensions/229/img-2.jpg', 'Natural Curly Highlights Hair Extension, Layered — detail view', 1, false),
   ('230', '/images/products/Hair Extensions/230/img-1.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — main view', 0, true),
   ('230', '/images/products/Hair Extensions/230/img-2.jpg', 'Natural Wavy Dark Brown Hair Extension, Layered — detail view', 1, false),
-  ('301', '/images/products/Hair Accessories/Hair Donut/img-1.PNG', 'Hair Donut Bun Maker — main view', 0, true),
-  ('301', '/images/products/Hair Accessories/Hair Donut/img-2.PNG', 'Hair Donut Bun Maker — size variant', 1, false),
-  ('301', '/images/products/Hair Accessories/Hair Donut/img-2.1.PNG', 'Hair Donut Bun Maker — size variant', 2, false),
-  ('302', '/images/products/Hair Accessories/Kunjalam/img-1.PNG', 'Kunjalam Braid Tassel — main view', 0, true),
-  ('302', '/images/products/Hair Accessories/Kunjalam/img-2.PNG', 'Kunjalam Braid Tassel — detail view', 1, false),
-  ('302', '/images/products/Hair Accessories/Kunjalam/img-3.PNG', 'Kunjalam Braid Tassel — detail view', 2, false),
-  ('302', '/images/products/Hair Accessories/Kunjalam/img-4.PNG', 'Kunjalam Braid Tassel — detail view', 3, false),
-  ('302', '/images/products/Hair Accessories/Kunjalam/img-5.PNG', 'Kunjalam Braid Tassel — detail view', 4, false),
-  ('303', '/images/products/Hair Accessories/Thread/img-1.PNG', 'Hair Braiding Thread — main view', 0, true),
-  ('303', '/images/products/Hair Accessories/Thread/img-2.PNG', 'Hair Braiding Thread — detail view', 1, false),
-  ('303', '/images/products/Hair Accessories/Thread/img-3.PNG', 'Hair Braiding Thread — detail view', 2, false)
+  ('301', '/images/products/Hair Accessories/Hair Donut Synthetic/img-1.PNG', 'Synthetic Hair Donut — main view', 0, true),
+  ('310', '/images/products/Hair Accessories/Hair Donut Sponge/img-1.PNG', 'Sponge Hair Donut — main view', 0, true),
+  ('310', '/images/products/Hair Accessories/Hair Donut Sponge/img-2.PNG', 'Sponge Hair Donut — size variant', 1, false),
+  ('302', '/images/products/Hair Accessories/Kunjalam - Pearl Bead/img-1.PNG', 'Kunjalam - Golden Beads', 0, true),
+  ('304', '/images/products/Hair Accessories/Kunjalam - Double Dome Plain/img-1.PNG', 'Kunjalam - Gold Plated', 0, true),
+  ('305', '/images/products/Hair Accessories/Kunjalam - Pearl Stone/img-1.PNG', 'Kunjalam - White Stones', 0, true),
+  ('306', '/images/products/Hair Accessories/Kunjalam - Kundan Stone/img-1.PNG', 'Kunjalam - Kemp Stone Big', 0, true),
+  ('307', '/images/products/Hair Accessories/Kunjalam - Kundan Double Dome/img-1.PNG', 'Kunjalam - Kemp Small', 0, true),
+  ('303', '/images/products/Hair Accessories/Thread/img-1.PNG', 'Silk Poly Thread 0/8 — main view', 0, true),
+  ('308', '/images/products/Hair Accessories/Maggam Thread Gold/img-1.PNG', 'Golden Thread — main view', 0, true)
 ) as v(code, image_url, alt_text, sort_order, is_primary) on v.code = p.code
 where not exists (
   select 1 from product_images pi where pi.product_id = p.id and pi.image_url = v.image_url
 );
+
+-- ---------------------------------------------------------------------
+-- product_variants — size/price options. Only the Sponge Hair Donut has
+-- these for now; stock_quantity per size is left at 0 (placeholder) until
+-- the owner sets real counts in Supabase, same as every other new product.
+-- ---------------------------------------------------------------------
+insert into product_variants (product_id, label, price_inr, stock_quantity, sort_order)
+select p.id, v.label, v.price_inr, v.stock_quantity, v.sort_order
+from products p
+join (values
+  ('310', 'Small', 40.00, 0, 0),
+  ('310', 'Medium', 55.00, 0, 1),
+  ('310', 'Big', 75.00, 0, 2)
+) as v(code, label, price_inr, stock_quantity, sort_order) on v.code = p.code
+where not exists (
+  select 1 from product_variants pv where pv.product_id = p.id and pv.label = v.label
+);
+
+-- The product row's own price_inr/stock_quantity are display fallbacks for
+-- a variant product (see product_variants above) — set to the cheapest
+-- size so "From ₹..." on /shop shows something sensible even before any
+-- individual variant stock is confirmed.
+update products set price_inr = 40.00 where code = '310';
 
 -- ---------------------------------------------------------------------
 -- product_hairstyles — which hairstyles each product suits.
@@ -394,7 +617,16 @@ from (values
   ('227', 'half-up-half-down'), ('227', 'voluminous-curls'), ('227', 'heart-braids'),
   ('228', 'soft-curls'), ('228', 'heart-braids'),
   ('229', 'voluminous-curls'), ('229', 'heart-braids'), ('229', 'messy-braids'),
-  ('230', 'soft-curls'), ('230', 'half-up-half-down')
+  ('230', 'soft-curls'), ('230', 'half-up-half-down'),
+
+  -- Hair Accessories: thread works with any hairstyle, so it's linked to
+  -- all six; kunjalam (all 5 designs) is specifically a messy-braids piece.
+  ('303', 'soft-curls'), ('303', 'braided'), ('303', 'half-up-half-down'),
+  ('303', 'heart-braids'), ('303', 'voluminous-curls'), ('303', 'messy-braids'),
+  ('308', 'soft-curls'), ('308', 'braided'), ('308', 'half-up-half-down'),
+  ('308', 'heart-braids'), ('308', 'voluminous-curls'), ('308', 'messy-braids'),
+  ('302', 'messy-braids'), ('304', 'messy-braids'), ('305', 'messy-braids'),
+  ('306', 'messy-braids'), ('307', 'messy-braids')
 ) as v(code, style_slug)
 join products p on p.code = v.code
 join hairstyles h on h.slug = v.style_slug

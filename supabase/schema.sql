@@ -77,18 +77,28 @@ create table if not exists products (
   -- normal case.
   stock_group text,
 
+  -- Groups several distinct product listings under one family for display —
+  -- e.g. 5 different Kunjalam designs, or 2 different Hair Donut materials.
+  -- When a category page has multiple products sharing the same
+  -- accessory_group, /shop shows one tile per group instead of one card per
+  -- product; clicking a tile filters down to that group's actual products.
+  -- NULL means "stands alone" — the normal case (e.g. all Hair Extensions).
+  accessory_group text,
+
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
 -- Migration for a database that already has `products` from before
--- stock_group existed. Safe to re-run.
+-- stock_group / accessory_group existed. Safe to re-run.
 alter table products add column if not exists stock_group text;
+alter table products add column if not exists accessory_group text;
 
 create index if not exists products_category_id_idx on products (category_id);
 create index if not exists products_texture_idx on products (texture);
 create index if not exists products_featured_idx on products (featured);
 create index if not exists products_stock_group_idx on products (stock_group) where stock_group is not null;
+create index if not exists products_accessory_group_idx on products (accessory_group) where accessory_group is not null;
 
 -- Mirrors any stock_quantity change on a grouped product to every other code
 -- sharing its stock_group — covers BOTH the app's checkout writes AND manual
@@ -115,6 +125,28 @@ create trigger trg_sync_stock_group
   after update of stock_quantity on products
   for each row
   execute function sync_stock_group();
+
+-- ---------------------------------------------------------------------
+-- product_variants — size/price options for a single product (e.g. the
+-- Sponge Hair Donut comes in Small/Medium/Big at different prices). Only
+-- products that need this have any rows here; a product with none is sold
+-- at its own price_inr/stock_quantity as usual. When a product does have
+-- variants, its own price_inr/stock_quantity are display fallbacks only
+-- (kept in sync as min price / summed stock — see seed.sql) — every actual
+-- purchase is priced and stocked against the chosen variant, never the
+-- product row itself.
+-- ---------------------------------------------------------------------
+create table if not exists product_variants (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid not null references products (id) on delete cascade,
+  label text not null,                        -- e.g. "Small", "Medium", "Big"
+  price_inr numeric(10, 2) not null check (price_inr >= 0),
+  stock_quantity int not null default 0 check (stock_quantity >= 0),
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists product_variants_product_id_idx on product_variants (product_id);
 
 -- ---------------------------------------------------------------------
 -- product_images — supports any number of images per product (0..N).
@@ -263,11 +295,16 @@ create table if not exists order_items (
   product_id uuid references products (id) on delete set null,
   product_code text not null,
   product_name text not null,
+  variant_label text,                         -- e.g. "Small" — null for products with no variants
   unit_price numeric(10, 2) not null check (unit_price >= 0),
   quantity int not null check (quantity > 0),
   line_total numeric(10, 2) not null check (line_total >= 0),
   created_at timestamptz not null default now()
 );
+
+-- Migration for a database that already has `order_items` from before
+-- variant_label existed. Safe to re-run.
+alter table order_items add column if not exists variant_label text;
 
 create index if not exists order_items_order_id_idx on order_items (order_id);
 
@@ -303,6 +340,7 @@ alter table categories enable row level security;
 alter table hairstyles enable row level security;
 alter table products enable row level security;
 alter table product_images enable row level security;
+alter table product_variants enable row level security;
 alter table product_hairstyles enable row level security;
 alter table hairstyle_inspiration enable row level security;
 alter table hairstyle_inspiration_products enable row level security;
@@ -322,6 +360,11 @@ create policy "Public read visible products" on products for select using (is_hi
 drop policy if exists "Public read product images" on product_images;
 create policy "Public read product images" on product_images for select using (
   exists (select 1 from products p where p.id = product_images.product_id and p.is_hidden = false)
+);
+
+drop policy if exists "Public read product variants" on product_variants;
+create policy "Public read product variants" on product_variants for select using (
+  exists (select 1 from products p where p.id = product_variants.product_id and p.is_hidden = false)
 );
 
 drop policy if exists "Public read product_hairstyles" on product_hairstyles;
@@ -400,7 +443,11 @@ from orders o
 left join (
   select
     order_id,
-    string_agg('#' || product_code || ' ' || product_name || ' x' || quantity, '; ' order by created_at) as products_ordered
+    string_agg(
+      '#' || product_code || ' ' || product_name
+        || coalesce(' (' || variant_label || ')', '') || ' x' || quantity,
+      '; ' order by created_at
+    ) as products_ordered
   from order_items
   group by order_id
 ) items on items.order_id = o.id

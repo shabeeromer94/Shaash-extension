@@ -7,6 +7,7 @@ type RawRow = any;
 const PRODUCT_SELECT = `
   *,
   images:product_images(*),
+  variants:product_variants(*),
   category:categories(*),
   hairstyle_links:product_hairstyles(hairstyle:hairstyles(*))
 `;
@@ -23,12 +24,15 @@ function mapProduct(row: RawRow): Product {
   const images = (row.images ?? [])
     .slice()
     .sort((a: RawRow, b: RawRow) => a.sort_order - b.sort_order);
+  const variants = (row.variants ?? [])
+    .slice()
+    .sort((a: RawRow, b: RawRow) => a.sort_order - b.sort_order);
   const hairstyles = (row.hairstyle_links ?? [])
     .map((link: RawRow) => link.hairstyle)
     .filter(Boolean);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to omit it from `rest`
   const { hairstyle_links, ...rest } = row;
-  return { ...rest, images, hairstyles } as Product;
+  return { ...rest, images, variants, hairstyles } as Product;
 }
 
 /**
@@ -71,8 +75,12 @@ export async function getAllProducts(filters: ProductFilters = {}): Promise<Prod
     if (error) throw error;
     let products = (data ?? []).map(mapProduct);
 
-    // Hairstyle tag-matching happens client-side after the fetch — the catalog is
-    // small enough that this stays simple and correct without a fragile nested-join filter.
+    // Category and hairstyle tag-matching happen client-side after the fetch
+    // — the catalog is small enough that this stays simple and correct
+    // without a fragile nested-join filter.
+    if (filters.category) {
+      products = products.filter((p) => p.category?.slug === filters.category);
+    }
     if (filters.hairstyle) {
       products = products.filter((p) => p.hairstyles?.some((h) => h.slug === filters.hairstyle));
     }

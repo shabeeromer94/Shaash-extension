@@ -12,6 +12,9 @@ import {
 
 export interface CartItem {
   productCode: string;
+  /** Present only for products sold with size/price options — see ProductPurchasePanel. Two lines with the same productCode but different variantId are different cart rows. */
+  variantId?: string;
+  variantLabel?: string;
   name: string;
   price: number;
   image: string;
@@ -20,11 +23,16 @@ export interface CartItem {
   maxQuantity: number;
 }
 
+/** A cart line's identity — same product but a different variant is a different line. */
+function lineKey(item: { productCode: string; variantId?: string }): string {
+  return item.variantId ? `${item.productCode}::${item.variantId}` : item.productCode;
+}
+
 interface CartContextValue {
   items: CartItem[];
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (productCode: string) => void;
-  updateQuantity: (productCode: string, quantity: number) => void;
+  removeItem: (productCode: string, variantId?: string) => void;
+  updateQuantity: (productCode: string, quantity: number, variantId?: string) => void;
   clearCart: () => void;
   subtotal: number;
   totalItems: number;
@@ -61,29 +69,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((item: Omit<CartItem, "quantity">, quantity = 1) => {
     setItems((prev) => {
-      const existing = prev.find((i) => i.productCode === item.productCode);
+      const existing = prev.find((i) => lineKey(i) === lineKey(item));
       if (existing) {
         const nextQty = Math.min(existing.quantity + quantity, existing.maxQuantity);
-        return prev.map((i) =>
-          i.productCode === item.productCode ? { ...i, quantity: nextQty } : i
-        );
+        return prev.map((i) => (lineKey(i) === lineKey(item) ? { ...i, quantity: nextQty } : i));
       }
       return [...prev, { ...item, quantity: Math.min(quantity, item.maxQuantity) }];
     });
   }, []);
 
-  const removeItem = useCallback((productCode: string) => {
-    setItems((prev) => prev.filter((i) => i.productCode !== productCode));
+  const removeItem = useCallback((productCode: string, variantId?: string) => {
+    const key = lineKey({ productCode, variantId });
+    setItems((prev) => prev.filter((i) => lineKey(i) !== key));
   }, []);
 
-  const updateQuantity = useCallback((productCode: string, quantity: number) => {
+  const updateQuantity = useCallback((productCode: string, quantity: number, variantId?: string) => {
+    const key = lineKey({ productCode, variantId });
     setItems((prev) =>
       prev
-        .map((i) =>
-          i.productCode === productCode
-            ? { ...i, quantity: Math.max(1, Math.min(quantity, i.maxQuantity)) }
-            : i
-        )
+        .map((i) => (lineKey(i) === key ? { ...i, quantity: Math.max(1, Math.min(quantity, i.maxQuantity)) } : i))
         .filter((i) => i.quantity > 0)
     );
   }, []);

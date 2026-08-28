@@ -26,7 +26,7 @@ export function OrderSummary({
 
       <div className="flex flex-col gap-4">
         {items.map((item) => (
-          <div key={item.productCode} className="flex items-center gap-3">
+          <div key={`${item.productCode}::${item.variantId ?? ""}`} className="flex items-center gap-3">
             <div className="relative h-14 w-12 shrink-0 overflow-hidden rounded-lg bg-beige/40">
               {item.image && (
                 <Image src={item.image} alt={item.name} fill sizes="60px" className="object-cover" />

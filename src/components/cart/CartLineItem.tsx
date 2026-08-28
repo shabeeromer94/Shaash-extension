@@ -28,10 +28,11 @@ export function CartLineItem({ item }: { item: CartItem }) {
             >
               {item.name}
             </Link>
+            {item.variantLabel && <p className="mt-0.5 text-sm text-charcoal-soft">Size: {item.variantLabel}</p>}
           </div>
           <button
             type="button"
-            onClick={() => removeItem(item.productCode)}
+            onClick={() => removeItem(item.productCode, item.variantId)}
             aria-label={`Remove ${item.name}`}
             className="text-taupe hover:text-charcoal"
           >
@@ -43,7 +44,7 @@ export function CartLineItem({ item }: { item: CartItem }) {
           <div className="flex h-10 items-center rounded-full border border-line">
             <button
               type="button"
-              onClick={() => updateQuantity(item.productCode, item.quantity - 1)}
+              onClick={() => updateQuantity(item.productCode, item.quantity - 1, item.variantId)}
               className="flex h-full w-9 items-center justify-center text-charcoal"
               aria-label="Decrease quantity"
             >
@@ -52,7 +53,7 @@ export function CartLineItem({ item }: { item: CartItem }) {
             <span className="w-7 text-center text-sm font-medium">{item.quantity}</span>
             <button
               type="button"
-              onClick={() => updateQuantity(item.productCode, item.quantity + 1)}
+              onClick={() => updateQuantity(item.productCode, item.quantity + 1, item.variantId)}
               className="flex h-full w-9 items-center justify-center text-charcoal disabled:opacity-40"
               aria-label="Increase quantity"
               disabled={item.quantity >= item.maxQuantity}

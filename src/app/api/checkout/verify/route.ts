@@ -10,6 +10,9 @@ interface ResolvedOrderItem {
   product_id: string;
   product_code: string;
   product_name: string;
+  /** Present only for products sold with size/price options — see ProductPurchasePanel. */
+  variant_id?: string;
+  variant_label?: string;
   unit_price: number;
   quantity: number;
   line_total: number;
@@ -93,18 +96,33 @@ export async function POST(request: Request) {
   }
 
   const productByCode = new Map(products.map((p) => [p.code, p]));
+
+  // Products sold with size/price options (see products.variants) are
+  // priced and stocked per-variant, never off the product row itself.
+  const productIds = products.map((p) => p.id);
+  const { data: variants } = productIds.length
+    ? await supabase.from("product_variants").select("id, product_id, label, price_inr, stock_quantity").in("product_id", productIds)
+    : { data: [] };
+  const variantById = new Map((variants ?? []).map((v) => [v.id, v]));
+
   const orderItems: ResolvedOrderItem[] = [];
 
   for (const item of data.items) {
     const product = productByCode.get(item.productCode);
     if (!product) continue; // Shouldn't happen post-payment; skip rather than fail the whole order.
+
+    const variant = item.variantId ? variantById.get(item.variantId) : undefined;
+    const unitPrice = variant ? variant.price_inr : product.price_inr;
+
     orderItems.push({
       product_id: product.id,
       product_code: product.code,
       product_name: product.name,
-      unit_price: product.price_inr,
+      variant_id: variant?.id,
+      variant_label: variant?.label,
+      unit_price: unitPrice,
       quantity: item.quantity,
-      line_total: product.price_inr * item.quantity,
+      line_total: unitPrice * item.quantity,
     });
   }
 
@@ -189,9 +207,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const { error: itemsError } = await supabase
-    .from("order_items")
-    .insert(orderItems.map((item) => ({ ...item, order_id: order.id })));
+  // variant_id is only used below for stock bookkeeping — order_items has no
+  // such column, it only stores the variant_label snapshot.
+  const { error: itemsError } = await supabase.from("order_items").insert(
+    orderItems.map((item) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars -- destructured only to omit it from the insert payload
+      const { variant_id, ...rest } = item;
+      return { ...rest, order_id: order.id };
+    })
+  );
 
   if (itemsError) {
     // The order itself is already saved with a real order_number — log loudly
@@ -199,6 +223,10 @@ export async function POST(request: Request) {
     console.error("[checkout/verify] Could not save order_items for", order.order_number, itemsError);
   }
 
+  // Products sold with size/price options decrement that specific variant's
+  // own stock — variants don't participate in stock_group pooling, each has
+  // an independent count.
+  const soldByVariant = new Map<string, number>(); // variant_id -> qty sold in this order
   // Some product codes share one physical stock pool (see products.stock_group)
   // — e.g. codes 210 and 204 are the same inventory listed twice. Buying
   // either must decrement every code in the group together, or the two
@@ -206,12 +234,25 @@ export async function POST(request: Request) {
   const soldByGroup = new Map<string, number>(); // stock_group -> total qty sold in this order
   const soldBySingleCode = new Map<string, number>(); // product_code -> qty, for ungrouped products
   for (const item of orderItems) {
+    if (item.variant_id) {
+      soldByVariant.set(item.variant_id, (soldByVariant.get(item.variant_id) ?? 0) + item.quantity);
+      continue;
+    }
     const product = productByCode.get(item.product_code)!;
     if (product.stock_group) {
       soldByGroup.set(product.stock_group, (soldByGroup.get(product.stock_group) ?? 0) + item.quantity);
     } else {
       soldBySingleCode.set(item.product_code, (soldBySingleCode.get(item.product_code) ?? 0) + item.quantity);
     }
+  }
+
+  for (const [variantId, qtySold] of soldByVariant) {
+    const variant = variantById.get(variantId);
+    if (!variant) continue;
+    await supabase
+      .from("product_variants")
+      .update({ stock_quantity: Math.max(variant.stock_quantity - qtySold, 0) })
+      .eq("id", variantId);
   }
 
   if (soldByGroup.size > 0) {
@@ -287,10 +328,10 @@ function buildTelegramMessage(params: {
   const esc = (value: string) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const itemLines = params.items
-    .map(
-      (item) =>
-        `• ${esc(item.product_name)} (#${item.product_code}) × ${item.quantity} — ${formatINR(item.line_total)}`
-    )
+    .map((item) => {
+      const variantSuffix = item.variant_label ? ` (${esc(item.variant_label)})` : "";
+      return `• ${esc(item.product_name)}${variantSuffix} (#${item.product_code}) × ${item.quantity} — ${formatINR(item.line_total)}`;
+    })
     .join("\n");
 
   const lines = [

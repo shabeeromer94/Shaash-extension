@@ -22,6 +22,10 @@ export function ProductCard({ product }: { product: Product }) {
   const primaryImage = product.images?.find((img) => img.is_primary) ?? product.images?.[0];
   const status = getAvailability(product);
   const isComposite = primaryImage ? isFrontBackComposite(primaryImage.image_url) : false;
+  const hasVariants = !!product.variants && product.variants.length > 0;
+  const displayPrice = hasVariants
+    ? Math.min(...product.variants!.map((v) => v.price_inr))
+    : product.price_inr;
 
   return (
     <Link href={`/products/${product.code}`} className="group flex flex-col">
@@ -55,7 +59,10 @@ export function ProductCard({ product }: { product: Product }) {
           <h3 className="mt-1 font-display text-lg leading-snug text-charcoal">{product.name}</h3>
           {product.length_label && <p className="mt-1 text-sm text-charcoal-soft">{product.length_label}</p>}
         </div>
-        <p className="whitespace-nowrap font-medium text-charcoal">{formatINR(product.price_inr)}</p>
+        <p className="whitespace-nowrap font-medium text-charcoal">
+          {hasVariants && <span className="text-charcoal-soft">From </span>}
+          {formatINR(displayPrice)}
+        </p>
       </div>
     </Link>
   );

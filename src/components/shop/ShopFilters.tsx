@@ -1,21 +1,33 @@
-import type { FilterOptions, Hairstyle, ProductFilters } from "@/lib/types";
+import type { Category, FilterOptions, Hairstyle, ProductFilters } from "@/lib/types";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
 
 interface ShopFiltersProps {
   options: FilterOptions;
   hairstyles: Hairstyle[];
+  categories: Category[];
   activeFilters: ProductFilters;
+  /** A category slug, or the literal "all" for the unfiltered option — see /shop/page.tsx. */
+  activeCategorySlug: string;
 }
 
 /**
  * A plain GET form — filtering/sorting happens via URL search params and a
  * full server render, so this needs zero client JS.
  */
-export function ShopFilters({ options, hairstyles, activeFilters }: ShopFiltersProps) {
+export function ShopFilters({ options, hairstyles, categories, activeFilters, activeCategorySlug }: ShopFiltersProps) {
   return (
     <form action="/shop" method="get" className="flex flex-col gap-5 lg:sticky lg:top-24 lg:self-start">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
+        <Select label="Category" name="category" defaultValue={activeCategorySlug}>
+          <option value="all">All Products</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.slug}>
+              {category.name}
+            </option>
+          ))}
+        </Select>
+
         <Select label="Texture" name="texture" defaultValue={activeFilters.texture ?? ""}>
           <option value="">All Textures</option>
           {options.textures.map((texture) => (
@@ -69,7 +81,7 @@ export function ShopFilters({ options, hairstyles, activeFilters }: ShopFiltersP
         <Button type="submit" className="flex-1">
           Apply Filters
         </Button>
-        <Button href="/shop" variant="ghost">
+        <Button href="/shop?category=all" variant="ghost">
           Clear
         </Button>
       </div>

@@ -31,6 +31,8 @@ const checkoutPayloadShape = baseCheckoutFields.extend({
       z.object({
         productCode: z.string().min(1),
         quantity: z.number().int().positive(),
+        /** Present only for products sold with size/price options — see ProductPurchasePanel. */
+        variantId: z.string().optional(),
       })
     )
     .min(1, "Your cart is empty."),

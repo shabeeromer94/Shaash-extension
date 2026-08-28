@@ -74,7 +74,7 @@ export function CheckoutForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          items: items.map((item) => ({ productCode: item.productCode, quantity: item.quantity })),
+          items: items.map((item) => ({ productCode: item.productCode, quantity: item.quantity, variantId: item.variantId })),
           razorpayOrderId: response.razorpay_order_id,
           razorpayPaymentId: response.razorpay_payment_id,
           razorpaySignature: response.razorpay_signature,
@@ -145,7 +145,7 @@ export function CheckoutForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          items: items.map((item) => ({ productCode: item.productCode, quantity: item.quantity })),
+          items: items.map((item) => ({ productCode: item.productCode, quantity: item.quantity, variantId: item.variantId })),
         }),
       });
 
