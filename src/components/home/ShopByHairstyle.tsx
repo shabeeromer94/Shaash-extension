@@ -55,13 +55,13 @@ export function ShopByHairstyle({ hairstyles }: { hairstyles: Hairstyle[] }) {
         </div>
         <div
           ref={scrollerRef}
-          className="mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto scrollbar-hide pb-2"
+          className="mt-6 flex snap-x snap-mandatory gap-4 overflow-x-auto scrollbar-hide pb-2"
         >
           {hairstyles.map((style) => (
             <Link
               key={style.id}
               href={`/hairstyles?style=${style.slug}#results`}
-              className="group flex w-24 shrink-0 snap-start flex-col overflow-hidden rounded-xl border-2 border-transparent bg-beige/50 transition-colors hover:border-taupe/60 sm:w-28"
+              className="group flex w-36 shrink-0 snap-start flex-col overflow-hidden rounded-xl border-2 border-transparent bg-beige/50 transition-colors hover:border-taupe/60 sm:w-44"
             >
               {/* aspect-[3/5] is close to these reference photos' own portrait proportions —
                   object-contain shows the whole photo uncropped instead of cutting off detail. */}
@@ -71,12 +71,12 @@ export function ShopByHairstyle({ hairstyles }: { hairstyles: Hairstyle[] }) {
                     src={style.image_url}
                     alt={style.name}
                     fill
-                    sizes="120px"
+                    sizes="180px"
                     className="object-contain transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
               </div>
-              <p className="bg-ivory/85 px-2 py-1.5 text-center font-display text-xs text-charcoal">
+              <p className="bg-ivory/85 px-3 py-2 text-center font-display text-sm text-charcoal sm:text-base">
                 {style.name}
               </p>
             </Link>

@@ -42,6 +42,7 @@ export default async function HomePage() {
       <Hero image={heroImage} />
       <WhyChooseUs />
       <ShopByHairstyle hairstyles={hairstyles} />
+      <ShopByCategory categories={categoryTiles} />
       <ProductShowcase
         eyebrow="Best Sellers"
         title="Featured Hair Extensions"
@@ -50,7 +51,6 @@ export default async function HomePage() {
         ctaHref="/shop"
         ctaLabel="View All Products"
       />
-      <ShopByCategory categories={categoryTiles} />
       <TrustSection />
       <FinalCTA />
     </>
